@@ -1,0 +1,125 @@
+{
+  "video": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbab8n.mpg",
+  "fps": 25.0,
+  "total_frames": 75,
+  "duration": 3.0,
+  "processed": 7,
+  "average_lip_box": [
+    58.0,
+    24.285714285714285
+  ],
+  "lip_regions": [
+    {
+      "frame_number": 10,
+      "time_seconds": 0.4,
+      "bbox": {
+        "x_min": 150,
+        "y_min": 214,
+        "x_max": 207,
+        "y_max": 244,
+        "width": 57,
+        "height": 30
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000010.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000010_96x96.jpg"
+      }
+    },
+    {
+      "frame_number": 20,
+      "time_seconds": 0.8,
+      "bbox": {
+        "x_min": 150,
+        "y_min": 212,
+        "x_max": 206,
+        "y_max": 241,
+        "width": 56,
+        "height": 29
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000020.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000020_96x96.jpg"
+      }
+    },
+    {
+      "frame_number": 30,
+      "time_seconds": 1.2,
+      "bbox": {
+        "x_min": 148,
+        "y_min": 212,
+        "x_max": 208,
+        "y_max": 247,
+        "width": 60,
+        "height": 35
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000030.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000030_96x96.jpg"
+      }
+    },
+    {
+      "frame_number": 40,
+      "time_seconds": 1.6,
+      "bbox": {
+        "x_min": 150,
+        "y_min": 215,
+        "x_max": 207,
+        "y_max": 237,
+        "width": 57,
+        "height": 22
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000040.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000040_96x96.jpg"
+      }
+    },
+    {
+      "frame_number": 50,
+      "time_seconds": 2.0,
+      "bbox": {
+        "x_min": 148,
+        "y_min": 216,
+        "x_max": 207,
+        "y_max": 234,
+        "width": 59,
+        "height": 18
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000050.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000050_96x96.jpg"
+      }
+    },
+    {
+      "frame_number": 60,
+      "time_seconds": 2.4,
+      "bbox": {
+        "x_min": 148,
+        "y_min": 215,
+        "x_max": 207,
+        "y_max": 233,
+        "width": 59,
+        "height": 18
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000060.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000060_96x96.jpg"
+      }
+    },
+    {
+      "frame_number": 70,
+      "time_seconds": 2.8,
+      "bbox": {
+        "x_min": 149,
+        "y_min": 213,
+        "x_max": 207,
+        "y_max": 231,
+        "width": 58,
+        "height": 18
+      },
+      "paths": {
+        "original": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000070.jpg",
+        "resized_96x96": "C:\\Users\\oksan\\LipRecognitionFYP\\demo\\lip_regions\\lip_frame_000070_96x96.jpg"
+      }
+    }
+  ]
+}

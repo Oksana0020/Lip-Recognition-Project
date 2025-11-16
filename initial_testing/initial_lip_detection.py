@@ -1,6 +1,7 @@
 """
-Simple Lip Detection Demo - Sprint 1
-Testing lip detection on first 5 GRID videos
+Sprint 1 – Lip Detection Demo
+- Tests initial lip detection pipeline on the first five GRID videos.
+- Verifies face and mouth landmark accuracy for later extraction tasks.
 """
 
 import cv2

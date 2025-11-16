@@ -1,0 +1,71 @@
+{
+  "video_file": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbab9s.mpg",
+  "alignment_file": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bbab9s.align",
+  "word_alignments": [
+    {
+      "start_frame": 0,
+      "end_frame": 17000,
+      "start_time": 0.0,
+      "end_time": 0.68,
+      "duration": 0.68,
+      "word": "sil"
+    },
+    {
+      "start_frame": 17000,
+      "end_frame": 21750,
+      "start_time": 0.68,
+      "end_time": 0.87,
+      "duration": 0.18999999999999995,
+      "word": "bin"
+    },
+    {
+      "start_frame": 21750,
+      "end_frame": 26000,
+      "start_time": 0.87,
+      "end_time": 1.04,
+      "duration": 0.17000000000000004,
+      "word": "blue"
+    },
+    {
+      "start_frame": 26000,
+      "end_frame": 28000,
+      "start_time": 1.04,
+      "end_time": 1.12,
+      "duration": 0.08000000000000007,
+      "word": "at"
+    },
+    {
+      "start_frame": 28000,
+      "end_frame": 32500,
+      "start_time": 1.12,
+      "end_time": 1.3,
+      "duration": 0.17999999999999994,
+      "word": "b"
+    },
+    {
+      "start_frame": 32500,
+      "end_frame": 39250,
+      "start_time": 1.3,
+      "end_time": 1.57,
+      "duration": 0.27,
+      "word": "nine"
+    },
+    {
+      "start_frame": 39250,
+      "end_frame": 47000,
+      "start_time": 1.57,
+      "end_time": 1.88,
+      "duration": 0.30999999999999983,
+      "word": "soon"
+    },
+    {
+      "start_frame": 47000,
+      "end_frame": 74500,
+      "start_time": 1.88,
+      "end_time": 2.98,
+      "duration": 1.1,
+      "word": "sil"
+    }
+  ],
+  "sentence": "bin blue at b nine soon"
+}
