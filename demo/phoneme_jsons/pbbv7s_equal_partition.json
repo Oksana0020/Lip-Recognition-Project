@@ -1,0 +1,494 @@
+{
+  "video_file": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pbbv7s.mpg",
+  "sentence": "place blue by v seven soon",
+  "words": [
+    {
+      "word": "place",
+      "word_timing": {
+        "start_time": 0.45,
+        "end_time": 0.69,
+        "duration": 0.23999999999999994
+      },
+      "phonemes": [
+        {
+          "phoneme": "P",
+          "word": "place",
+          "start_time": 0.45,
+          "end_time": 0.51,
+          "duration": 0.06,
+          "start_frame": 11250,
+          "end_frame": 12750,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "L",
+          "word": "place",
+          "start_time": 0.51,
+          "end_time": 0.57,
+          "duration": 0.05999999999999994,
+          "start_frame": 12750,
+          "end_frame": 14249,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "EY",
+          "word": "place",
+          "start_time": 0.57,
+          "end_time": 0.6299999999999999,
+          "duration": 0.05999999999999994,
+          "start_frame": 14249,
+          "end_frame": 15749,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "S",
+          "word": "place",
+          "start_time": 0.6299999999999999,
+          "end_time": 0.6899999999999998,
+          "duration": 0.05999999999999994,
+          "start_frame": 15749,
+          "end_frame": 17249,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 4
+    },
+    {
+      "word": "blue",
+      "word_timing": {
+        "start_time": 0.69,
+        "end_time": 0.95,
+        "duration": 0.26
+      },
+      "phonemes": [
+        {
+          "phoneme": "B",
+          "word": "blue",
+          "start_time": 0.69,
+          "end_time": 0.7766666666666666,
+          "duration": 0.08666666666666667,
+          "start_frame": 17250,
+          "end_frame": 19416,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "L",
+          "word": "blue",
+          "start_time": 0.7766666666666666,
+          "end_time": 0.8633333333333333,
+          "duration": 0.08666666666666667,
+          "start_frame": 19416,
+          "end_frame": 21583,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "UW",
+          "word": "blue",
+          "start_time": 0.8633333333333333,
+          "end_time": 0.95,
+          "duration": 0.08666666666666667,
+          "start_frame": 21583,
+          "end_frame": 23750,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 3
+    },
+    {
+      "word": "by",
+      "word_timing": {
+        "start_time": 0.95,
+        "end_time": 1.18,
+        "duration": 0.22999999999999998
+      },
+      "phonemes": [
+        {
+          "phoneme": "B",
+          "word": "by",
+          "start_time": 0.95,
+          "end_time": 1.065,
+          "duration": 0.11499999999999999,
+          "start_frame": 23750,
+          "end_frame": 26625,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "AY",
+          "word": "by",
+          "start_time": 1.065,
+          "end_time": 1.18,
+          "duration": 0.11499999999999999,
+          "start_frame": 26625,
+          "end_frame": 29500,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "v",
+      "word_timing": {
+        "start_time": 1.18,
+        "end_time": 1.38,
+        "duration": 0.19999999999999996
+      },
+      "phonemes": [
+        {
+          "phoneme": "V",
+          "word": "v",
+          "start_time": 1.18,
+          "end_time": 1.2799999999999998,
+          "duration": 0.09999999999999987,
+          "start_frame": 29500,
+          "end_frame": 31999,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "IY",
+          "word": "v",
+          "start_time": 1.2799999999999998,
+          "end_time": 1.38,
+          "duration": 0.10000000000000009,
+          "start_frame": 31999,
+          "end_frame": 34500,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "seven",
+      "word_timing": {
+        "start_time": 1.38,
+        "end_time": 1.71,
+        "duration": 0.33000000000000007
+      },
+      "phonemes": [
+        {
+          "phoneme": "S",
+          "word": "seven",
+          "start_time": 1.38,
+          "end_time": 1.446,
+          "duration": 0.06600000000000006,
+          "start_frame": 34500,
+          "end_frame": 36150,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "EH",
+          "word": "seven",
+          "start_time": 1.446,
+          "end_time": 1.512,
+          "duration": 0.06600000000000006,
+          "start_frame": 36150,
+          "end_frame": 37800,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "V",
+          "word": "seven",
+          "start_time": 1.512,
+          "end_time": 1.578,
+          "duration": 0.06600000000000006,
+          "start_frame": 37800,
+          "end_frame": 39450,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "AH",
+          "word": "seven",
+          "start_time": 1.5779999999999998,
+          "end_time": 1.644,
+          "duration": 0.06600000000000006,
+          "start_frame": 39449,
+          "end_frame": 41100,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "N",
+          "word": "seven",
+          "start_time": 1.644,
+          "end_time": 1.71,
+          "duration": 0.06600000000000006,
+          "start_frame": 41100,
+          "end_frame": 42750,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 5
+    },
+    {
+      "word": "soon",
+      "word_timing": {
+        "start_time": 1.71,
+        "end_time": 2.06,
+        "duration": 0.3500000000000001
+      },
+      "phonemes": [
+        {
+          "phoneme": "S",
+          "word": "soon",
+          "start_time": 1.71,
+          "end_time": 1.8266666666666667,
+          "duration": 0.1166666666666667,
+          "start_frame": 42750,
+          "end_frame": 45666,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "UW",
+          "word": "soon",
+          "start_time": 1.8266666666666667,
+          "end_time": 1.9433333333333334,
+          "duration": 0.1166666666666667,
+          "start_frame": 45666,
+          "end_frame": 48583,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "N",
+          "word": "soon",
+          "start_time": 1.9433333333333334,
+          "end_time": 2.06,
+          "duration": 0.1166666666666667,
+          "start_frame": 48583,
+          "end_frame": 51500,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 3
+    }
+  ],
+  "phonemes": [
+    "P",
+    "L",
+    "EY",
+    "S",
+    "B",
+    "L",
+    "UW",
+    "B",
+    "AY",
+    "V",
+    "IY",
+    "S",
+    "EH",
+    "V",
+    "AH",
+    "N",
+    "S",
+    "UW",
+    "N"
+  ],
+  "total_words": 6,
+  "total_phonemes": 19,
+  "unique_phonemes": [
+    "AY",
+    "S",
+    "V",
+    "IY",
+    "UW",
+    "B",
+    "P",
+    "EY",
+    "L",
+    "N",
+    "EH",
+    "AH"
+  ],
+  "unique_phoneme_count": 12,
+  "alignment_method": "equal_partition",
+  "phoneme_intervals": [
+    {
+      "phoneme": "P",
+      "word": "place",
+      "start_time": 0.45,
+      "end_time": 0.51,
+      "duration": 0.06,
+      "start_frame": 11250,
+      "end_frame": 12750,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "L",
+      "word": "place",
+      "start_time": 0.51,
+      "end_time": 0.57,
+      "duration": 0.05999999999999994,
+      "start_frame": 12750,
+      "end_frame": 14249,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "EY",
+      "word": "place",
+      "start_time": 0.57,
+      "end_time": 0.6299999999999999,
+      "duration": 0.05999999999999994,
+      "start_frame": 14249,
+      "end_frame": 15749,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "S",
+      "word": "place",
+      "start_time": 0.6299999999999999,
+      "end_time": 0.6899999999999998,
+      "duration": 0.05999999999999994,
+      "start_frame": 15749,
+      "end_frame": 17249,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "B",
+      "word": "blue",
+      "start_time": 0.69,
+      "end_time": 0.7766666666666666,
+      "duration": 0.08666666666666667,
+      "start_frame": 17250,
+      "end_frame": 19416,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "L",
+      "word": "blue",
+      "start_time": 0.7766666666666666,
+      "end_time": 0.8633333333333333,
+      "duration": 0.08666666666666667,
+      "start_frame": 19416,
+      "end_frame": 21583,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "UW",
+      "word": "blue",
+      "start_time": 0.8633333333333333,
+      "end_time": 0.95,
+      "duration": 0.08666666666666667,
+      "start_frame": 21583,
+      "end_frame": 23750,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "B",
+      "word": "by",
+      "start_time": 0.95,
+      "end_time": 1.065,
+      "duration": 0.11499999999999999,
+      "start_frame": 23750,
+      "end_frame": 26625,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "AY",
+      "word": "by",
+      "start_time": 1.065,
+      "end_time": 1.18,
+      "duration": 0.11499999999999999,
+      "start_frame": 26625,
+      "end_frame": 29500,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "V",
+      "word": "v",
+      "start_time": 1.18,
+      "end_time": 1.2799999999999998,
+      "duration": 0.09999999999999987,
+      "start_frame": 29500,
+      "end_frame": 31999,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "IY",
+      "word": "v",
+      "start_time": 1.2799999999999998,
+      "end_time": 1.38,
+      "duration": 0.10000000000000009,
+      "start_frame": 31999,
+      "end_frame": 34500,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "S",
+      "word": "seven",
+      "start_time": 1.38,
+      "end_time": 1.446,
+      "duration": 0.06600000000000006,
+      "start_frame": 34500,
+      "end_frame": 36150,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "EH",
+      "word": "seven",
+      "start_time": 1.446,
+      "end_time": 1.512,
+      "duration": 0.06600000000000006,
+      "start_frame": 36150,
+      "end_frame": 37800,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "V",
+      "word": "seven",
+      "start_time": 1.512,
+      "end_time": 1.578,
+      "duration": 0.06600000000000006,
+      "start_frame": 37800,
+      "end_frame": 39450,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "AH",
+      "word": "seven",
+      "start_time": 1.5779999999999998,
+      "end_time": 1.644,
+      "duration": 0.06600000000000006,
+      "start_frame": 39449,
+      "end_frame": 41100,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "N",
+      "word": "seven",
+      "start_time": 1.644,
+      "end_time": 1.71,
+      "duration": 0.06600000000000006,
+      "start_frame": 41100,
+      "end_frame": 42750,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "S",
+      "word": "soon",
+      "start_time": 1.71,
+      "end_time": 1.8266666666666667,
+      "duration": 0.1166666666666667,
+      "start_frame": 42750,
+      "end_frame": 45666,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "UW",
+      "word": "soon",
+      "start_time": 1.8266666666666667,
+      "end_time": 1.9433333333333334,
+      "duration": 0.1166666666666667,
+      "start_frame": 45666,
+      "end_frame": 48583,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "N",
+      "word": "soon",
+      "start_time": 1.9433333333333334,
+      "end_time": 2.06,
+      "duration": 0.1166666666666667,
+      "start_frame": 48583,
+      "end_frame": 51500,
+      "alignment_method": "equal_partition"
+    }
+  ],
+  "base_name": "pbbv7s"
+}

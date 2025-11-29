@@ -3,254 +3,254 @@
   "seed": 42,
   "pairs": [
     {
-      "base_name": "brwx5s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\brwx5s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\brwx5s.align"
+      "base_name": "prii8p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\prii8p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\prii8p.align"
     },
     {
-      "base_name": "bbir2n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbir2n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bbir2n.align"
+      "base_name": "bgwo2n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bgwo2n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bgwo2n.align"
     },
     {
-      "base_name": "lwbk9n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lwbk9n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lwbk9n.align"
+      "base_name": "bbbs5s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbbs5s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bbbs5s.align"
     },
     {
-      "base_name": "lrid8p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lrid8p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lrid8p.align"
+      "base_name": "sbat9a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sbat9a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sbat9a.align"
     },
     {
-      "base_name": "lgwz9a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lgwz9a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lgwz9a.align"
+      "base_name": "lbiq2p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lbiq2p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lbiq2p.align"
     },
     {
-      "base_name": "bwwa9p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bwwa9p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bwwa9p.align"
+      "base_name": "lbaq6p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lbaq6p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lbaq6p.align"
     },
     {
-      "base_name": "briz8a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\briz8a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\briz8a.align"
+      "base_name": "bwwh2n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bwwh2n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bwwh2n.align"
     },
     {
-      "base_name": "srbh4s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\srbh4s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\srbh4s.align"
+      "base_name": "brbm8p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\brbm8p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\brbm8p.align"
     },
     {
-      "base_name": "brbg4a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\brbg4a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\brbg4a.align"
+      "base_name": "sban4p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sban4p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sban4p.align"
     },
     {
-      "base_name": "swbvzp",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\swbvzp.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\swbvzp.align"
+      "base_name": "bgit6p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bgit6p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bgit6p.align"
     },
     {
-      "base_name": "pwaj5s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pwaj5s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pwaj5s.align"
+      "base_name": "pwax4n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pwax4n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pwax4n.align"
     },
     {
-      "base_name": "bbwjzn",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbwjzn.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bbwjzn.align"
+      "base_name": "sbat8p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sbat8p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sbat8p.align"
     },
     {
-      "base_name": "bbwf5n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbwf5n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bbwf5n.align"
+      "base_name": "srin5s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\srin5s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\srin5s.align"
     },
     {
-      "base_name": "brie9a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\brie9a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\brie9a.align"
+      "base_name": "pgak4p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pgak4p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pgak4p.align"
     },
     {
-      "base_name": "lgwm3a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lgwm3a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lgwm3a.align"
+      "base_name": "bgbu5a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bgbu5a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bgbu5a.align"
     },
     {
-      "base_name": "lray5a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lray5a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lray5a.align"
+      "base_name": "pgwl1s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pgwl1s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pgwl1s.align"
     },
     {
-      "base_name": "sgbc8a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\sgbc8a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\sgbc8a.align"
+      "base_name": "lwal4p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lwal4p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lwal4p.align"
     },
     {
-      "base_name": "swwc4n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\swwc4n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\swwc4n.align"
+      "base_name": "bbif1a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbif1a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bbif1a.align"
     },
     {
-      "base_name": "bbirzn",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbirzn.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bbirzn.align"
+      "base_name": "bbie8n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbie8n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bbie8n.align"
     },
     {
-      "base_name": "sriuzp",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\sriuzp.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\sriuzp.align"
+      "base_name": "bgig7s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bgig7s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bgig7s.align"
     },
     {
-      "base_name": "lgbjzp",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lgbjzp.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lgbjzp.align"
+      "base_name": "bwitzp",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bwitzp.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bwitzp.align"
     },
     {
-      "base_name": "srbh3a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\srbh3a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\srbh3a.align"
+      "base_name": "bwwu3a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bwwu3a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bwwu3a.align"
     },
     {
-      "base_name": "pwad2n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pwad2n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pwad2n.align"
+      "base_name": "pbbv7s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pbbv7s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pbbv7s.align"
     },
     {
-      "base_name": "lgws2n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lgws2n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lgws2n.align"
+      "base_name": "prac6n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\prac6n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\prac6n.align"
     },
     {
-      "base_name": "pwwezn",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pwwezn.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pwwezn.align"
+      "base_name": "bbbs7a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbbs7a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bbbs7a.align"
     },
     {
-      "base_name": "swbu9a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\swbu9a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\swbu9a.align"
+      "base_name": "pgbk8p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pgbk8p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pgbk8p.align"
     },
     {
-      "base_name": "lwbr6p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lwbr6p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lwbr6p.align"
+      "base_name": "bwbhzp",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bwbhzp.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bwbhzp.align"
     },
     {
-      "base_name": "bbar9a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bbar9a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bbar9a.align"
+      "base_name": "pwwk5s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pwwk5s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pwwk5s.align"
     },
     {
-      "base_name": "lbbezs",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lbbezs.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lbbezs.align"
+      "base_name": "prwd5s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\prwd5s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\prwd5s.align"
     },
     {
-      "base_name": "pwajzp",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pwajzp.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pwajzp.align"
+      "base_name": "pwij4p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pwij4p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pwij4p.align"
     },
     {
-      "base_name": "pgaa4n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pgaa4n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pgaa4n.align"
+      "base_name": "lwafzp",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lwafzp.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lwafzp.align"
     },
     {
-      "base_name": "lwbr5n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lwbr5n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lwbr5n.align"
+      "base_name": "bwwa9s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bwwa9s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bwwa9s.align"
     },
     {
-      "base_name": "lbax3p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lbax3p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lbax3p.align"
+      "base_name": "lwie5s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lwie5s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lwie5s.align"
     },
     {
-      "base_name": "lgwc8n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lgwc8n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lgwc8n.align"
+      "base_name": "pgwe9a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pgwe9a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pgwe9a.align"
     },
     {
-      "base_name": "pbwp4n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pbwp4n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pbwp4n.align"
+      "base_name": "lbix4n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lbix4n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lbix4n.align"
     },
     {
-      "base_name": "briz6p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\briz6p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\briz6p.align"
+      "base_name": "sgbj1s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sgbj1s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sgbj1s.align"
     },
     {
-      "base_name": "brbz8p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\brbz8p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\brbz8p.align"
+      "base_name": "srbb6p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\srbb6p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\srbb6p.align"
     },
     {
-      "base_name": "prac2s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\prac2s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\prac2s.align"
+      "base_name": "bbal8p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbal8p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bbal8p.align"
     },
     {
-      "base_name": "bril5p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bril5p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bril5p.align"
+      "base_name": "sbia2p",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sbia2p.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sbia2p.align"
     },
     {
-      "base_name": "pgby4n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pgby4n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pgby4n.align"
+      "base_name": "sgbc7s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sgbc7s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sgbc7s.align"
     },
     {
-      "base_name": "pgaj9s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pgaj9s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pgaj9s.align"
+      "base_name": "briz9a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\briz9a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\briz9a.align"
     },
     {
-      "base_name": "swwi4p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\swwi4p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\swwi4p.align"
+      "base_name": "pwid1a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\pwid1a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\pwid1a.align"
     },
     {
-      "base_name": "lwae8s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lwae8s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\lwae8s.align"
+      "base_name": "lgwa1a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lgwa1a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lgwa1a.align"
     },
     {
-      "base_name": "bgan2n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bgan2n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bgan2n.align"
+      "base_name": "bris5a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bris5a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bris5a.align"
     },
     {
-      "base_name": "sbag5p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\sbag5p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\sbag5p.align"
+      "base_name": "bwis8n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bwis8n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bwis8n.align"
     },
     {
-      "base_name": "srah4a",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\srah4a.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\srah4a.align"
+      "base_name": "swiu4n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\swiu4n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\swiu4n.align"
     },
     {
-      "base_name": "bwbm8n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bwbm8n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bwbm8n.align"
+      "base_name": "sbig5s",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\sbig5s.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\sbig5s.align"
     },
     {
-      "base_name": "pgwy7p",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\pgwy7p.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\pgwy7p.align"
+      "base_name": "lgiz2n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lgiz2n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lgiz2n.align"
     },
     {
-      "base_name": "bral7s",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\bral7s.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\bral7s.align"
+      "base_name": "bgig6n",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bgig6n.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bgig6n.align"
     },
     {
-      "base_name": "sria1n",
-      "video_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\sria1n.mpg",
-      "alignment_path": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\alignments\\s1\\sria1n.align"
+      "base_name": "lrbr7a",
+      "video_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lrbr7a.mpg",
+      "alignment_path": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\lrbr7a.align"
     }
   ]
 }

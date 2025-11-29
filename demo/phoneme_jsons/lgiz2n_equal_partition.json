@@ -1,0 +1,388 @@
+{
+  "video_file": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\lgiz2n.mpg",
+  "sentence": "lay green in z two now",
+  "words": [
+    {
+      "word": "lay",
+      "word_timing": {
+        "start_time": 0.51,
+        "end_time": 0.77,
+        "duration": 0.26
+      },
+      "phonemes": [
+        {
+          "phoneme": "L",
+          "word": "lay",
+          "start_time": 0.51,
+          "end_time": 0.64,
+          "duration": 0.13,
+          "start_frame": 12750,
+          "end_frame": 16000,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "EY",
+          "word": "lay",
+          "start_time": 0.64,
+          "end_time": 0.77,
+          "duration": 0.13,
+          "start_frame": 16000,
+          "end_frame": 19250,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "green",
+      "word_timing": {
+        "start_time": 0.77,
+        "end_time": 0.99,
+        "duration": 0.21999999999999997
+      },
+      "phonemes": [
+        {
+          "phoneme": "G",
+          "word": "green",
+          "start_time": 0.77,
+          "end_time": 0.825,
+          "duration": 0.05499999999999994,
+          "start_frame": 19250,
+          "end_frame": 20625,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "R",
+          "word": "green",
+          "start_time": 0.825,
+          "end_time": 0.8799999999999999,
+          "duration": 0.05499999999999994,
+          "start_frame": 20625,
+          "end_frame": 21999,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "IY",
+          "word": "green",
+          "start_time": 0.88,
+          "end_time": 0.935,
+          "duration": 0.05500000000000005,
+          "start_frame": 22000,
+          "end_frame": 23375,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "N",
+          "word": "green",
+          "start_time": 0.935,
+          "end_time": 0.99,
+          "duration": 0.05499999999999994,
+          "start_frame": 23375,
+          "end_frame": 24750,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 4
+    },
+    {
+      "word": "in",
+      "word_timing": {
+        "start_time": 0.99,
+        "end_time": 1.05,
+        "duration": 0.06000000000000005
+      },
+      "phonemes": [
+        {
+          "phoneme": "IH",
+          "word": "in",
+          "start_time": 0.99,
+          "end_time": 1.02,
+          "duration": 0.030000000000000027,
+          "start_frame": 24750,
+          "end_frame": 25500,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "N",
+          "word": "in",
+          "start_time": 1.02,
+          "end_time": 1.05,
+          "duration": 0.030000000000000027,
+          "start_frame": 25500,
+          "end_frame": 26250,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "z",
+      "word_timing": {
+        "start_time": 1.05,
+        "end_time": 1.22,
+        "duration": 0.16999999999999993
+      },
+      "phonemes": [
+        {
+          "phoneme": "Z",
+          "word": "z",
+          "start_time": 1.05,
+          "end_time": 1.135,
+          "duration": 0.08499999999999996,
+          "start_frame": 26250,
+          "end_frame": 28375,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "IY",
+          "word": "z",
+          "start_time": 1.135,
+          "end_time": 1.22,
+          "duration": 0.08499999999999996,
+          "start_frame": 28375,
+          "end_frame": 30500,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "two",
+      "word_timing": {
+        "start_time": 1.22,
+        "end_time": 1.48,
+        "duration": 0.26
+      },
+      "phonemes": [
+        {
+          "phoneme": "T",
+          "word": "two",
+          "start_time": 1.22,
+          "end_time": 1.35,
+          "duration": 0.13000000000000012,
+          "start_frame": 30500,
+          "end_frame": 33750,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "UW",
+          "word": "two",
+          "start_time": 1.35,
+          "end_time": 1.48,
+          "duration": 0.1299999999999999,
+          "start_frame": 33750,
+          "end_frame": 37000,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "now",
+      "word_timing": {
+        "start_time": 1.48,
+        "end_time": 1.83,
+        "duration": 0.3500000000000001
+      },
+      "phonemes": [
+        {
+          "phoneme": "N",
+          "word": "now",
+          "start_time": 1.48,
+          "end_time": 1.655,
+          "duration": 0.17500000000000004,
+          "start_frame": 37000,
+          "end_frame": 41375,
+          "alignment_method": "equal_partition"
+        },
+        {
+          "phoneme": "AW",
+          "word": "now",
+          "start_time": 1.655,
+          "end_time": 1.83,
+          "duration": 0.17500000000000004,
+          "start_frame": 41375,
+          "end_frame": 45750,
+          "alignment_method": "equal_partition"
+        }
+      ],
+      "phoneme_count": 2
+    }
+  ],
+  "phonemes": [
+    "L",
+    "EY",
+    "G",
+    "R",
+    "IY",
+    "N",
+    "IH",
+    "N",
+    "Z",
+    "IY",
+    "T",
+    "UW",
+    "N",
+    "AW"
+  ],
+  "total_words": 6,
+  "total_phonemes": 14,
+  "unique_phonemes": [
+    "AW",
+    "IH",
+    "T",
+    "IY",
+    "R",
+    "G",
+    "Z",
+    "UW",
+    "EY",
+    "L",
+    "N"
+  ],
+  "unique_phoneme_count": 11,
+  "alignment_method": "equal_partition",
+  "phoneme_intervals": [
+    {
+      "phoneme": "L",
+      "word": "lay",
+      "start_time": 0.51,
+      "end_time": 0.64,
+      "duration": 0.13,
+      "start_frame": 12750,
+      "end_frame": 16000,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "EY",
+      "word": "lay",
+      "start_time": 0.64,
+      "end_time": 0.77,
+      "duration": 0.13,
+      "start_frame": 16000,
+      "end_frame": 19250,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "G",
+      "word": "green",
+      "start_time": 0.77,
+      "end_time": 0.825,
+      "duration": 0.05499999999999994,
+      "start_frame": 19250,
+      "end_frame": 20625,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "R",
+      "word": "green",
+      "start_time": 0.825,
+      "end_time": 0.8799999999999999,
+      "duration": 0.05499999999999994,
+      "start_frame": 20625,
+      "end_frame": 21999,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "IY",
+      "word": "green",
+      "start_time": 0.88,
+      "end_time": 0.935,
+      "duration": 0.05500000000000005,
+      "start_frame": 22000,
+      "end_frame": 23375,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "N",
+      "word": "green",
+      "start_time": 0.935,
+      "end_time": 0.99,
+      "duration": 0.05499999999999994,
+      "start_frame": 23375,
+      "end_frame": 24750,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "IH",
+      "word": "in",
+      "start_time": 0.99,
+      "end_time": 1.02,
+      "duration": 0.030000000000000027,
+      "start_frame": 24750,
+      "end_frame": 25500,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "N",
+      "word": "in",
+      "start_time": 1.02,
+      "end_time": 1.05,
+      "duration": 0.030000000000000027,
+      "start_frame": 25500,
+      "end_frame": 26250,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "Z",
+      "word": "z",
+      "start_time": 1.05,
+      "end_time": 1.135,
+      "duration": 0.08499999999999996,
+      "start_frame": 26250,
+      "end_frame": 28375,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "IY",
+      "word": "z",
+      "start_time": 1.135,
+      "end_time": 1.22,
+      "duration": 0.08499999999999996,
+      "start_frame": 28375,
+      "end_frame": 30500,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "T",
+      "word": "two",
+      "start_time": 1.22,
+      "end_time": 1.35,
+      "duration": 0.13000000000000012,
+      "start_frame": 30500,
+      "end_frame": 33750,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "UW",
+      "word": "two",
+      "start_time": 1.35,
+      "end_time": 1.48,
+      "duration": 0.1299999999999999,
+      "start_frame": 33750,
+      "end_frame": 37000,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "N",
+      "word": "now",
+      "start_time": 1.48,
+      "end_time": 1.655,
+      "duration": 0.17500000000000004,
+      "start_frame": 37000,
+      "end_frame": 41375,
+      "alignment_method": "equal_partition"
+    },
+    {
+      "phoneme": "AW",
+      "word": "now",
+      "start_time": 1.655,
+      "end_time": 1.83,
+      "duration": 0.17500000000000004,
+      "start_frame": 41375,
+      "end_frame": 45750,
+      "alignment_method": "equal_partition"
+    }
+  ],
+  "base_name": "lgiz2n"
+}
