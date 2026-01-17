@@ -13,16 +13,20 @@ import json
 import random
 from pathlib import Path
 
+
 def find_grid_videos_and_alignments() -> list:
     """Return all matching video + alignment pairs from speaker s1."""
-    root = Path(__file__).parent.parent / "data" / "grid" / "GRID dataset full"
-    videos_path = root / "s1"
-    alignments_path = root / "alignments" / "s1"
+    root = Path(__file__).parent.parent
+    data_root = root / "data" / "grid" / "GRID dataset full"
+    videos_path = data_root / "s1"
+    alignments_path = data_root / "alignments" / "s1"
 
     if not videos_path.exists():
         raise FileNotFoundError(f"Video folder not found: {videos_path}")
     if not alignments_path.exists():
-        raise FileNotFoundError(f"Alignment folder not found: {alignments_path}")
+        raise FileNotFoundError(
+            "Alignment folder not found: {}".format(alignments_path)
+        )
 
     video_files = [f for f in os.listdir(videos_path) if f.endswith(".mpg")]
 
@@ -47,7 +51,7 @@ def find_grid_videos_and_alignments() -> list:
 
 
 def sample_50_pairs(seed: int = 42) -> list:
-    """Randomly sample 50 video–alignment pairs (or fewer if dataset too small)."""
+    """Randomly sample 50 video-alignment pairs (or fewer if dataset small)."""
     all_pairs = find_grid_videos_and_alignments()
     total = len(all_pairs)
 
@@ -62,13 +66,19 @@ def sample_50_pairs(seed: int = 42) -> list:
 
 def main():
     print("=" * 70)
-    print("GRID VIDEO SAMPLING. SELECTING 50 VIDEO–ALIGNMENT PAIRS FOR EVALUATION")
+    print(
+        "GRID VIDEO SAMPLING. SELECTING 50 VIDEO-"
+        "ALIGNMENT PAIRS FOR EVALUATION"
+    )
     print("=" * 70)
 
     samples = sample_50_pairs(seed=42)
 
     print(f"Total pairs selected: {len(samples)}\n")
-    print(f"{'#':<3} | {'Base name':<12} | {'Video file':<20} | {'Alignment file'}")
+    print(
+        f"{'#':<3} | {'Base name':<12} | "
+        f"{'Video file':<20} | {'Alignment file'}"
+    )
     print("-" * 70)
 
     for i, item in enumerate(samples, 1):

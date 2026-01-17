@@ -1,14 +1,12 @@
 """
-Batch-run the equal-partition phoneme extraction pipeline on sample of 50 GRID videos.
-Script ensures the file 'sample_50_grid_pairs.json' exists.
-If missing, it automatically samples 50 video/alignment pairs
-using find_grid_videos_and_alignments() and saves them.
-For each sampled video:
-- runs extract_phonemes_equal_partition() to produce phoneme timing JSON
-- saves the results
-- calls save_phoneme_frames.py as a subprocess to generate labelled frames
-using either centre of each phoneme interval
--collects all extraction results into batch_equal_partition_results.json
+Batch-run the equal-partition phoneme extraction pipeline on a sample of
+50 GRID videos. The script ensures the file
+'sample_50_grid_pairs.json' exists. If the file is missing, it will sample
+50 video/alignment pairs using find_grid_videos_and_alignments() and save
+them. For each sampled video the script runs
+extract_phonemes_equal_partition(), saves the results, and calls
+save_phoneme_frames.py as a subprocess to generate labelled frames.
+All extraction results are collected into batch_equal_partition_results.json.
 """
 
 import argparse
@@ -17,7 +15,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from extract_phonemes_equal_partition import extract_phonemes_equal_partition, find_grid_videos_and_alignments
+from extract_phonemes_equal_partition import (
+    extract_phonemes_equal_partition,
+    find_grid_videos_and_alignments,
+)
 
 
 HERE = Path(__file__).parent
@@ -28,7 +29,7 @@ PHONEME_FRAMES_DIR = HERE / "phoneme_frames"
 
 
 def ensure_sample_file():
-    """Create sample_50_grid_pairs.json if missing by sampling pairs programmatically."""
+    """Create sample_50_grid_pairs.json if missing by sampling pairs."""
     if SAMPLE_FILE.exists():
         try:
             with open(SAMPLE_FILE, "r", encoding="utf-8") as f:
@@ -39,7 +40,6 @@ def ensure_sample_file():
             SAMPLE_FILE.unlink()
 
     print("Sample file not found — creating sample_50_grid_pairs.json now...")
-    pairs = []
     all_pairs = find_grid_videos_and_alignments()
     import random
 
@@ -56,15 +56,32 @@ def ensure_sample_file():
             "alignment_path": str(p.get("alignment_path")),
         })
 
-    payload = {"num_samples": len(serializable), "seed": 42, "pairs": serializable}
+    payload = {
+        "num_samples": len(serializable),
+        "seed": 42,
+        "pairs": serializable,
+    }
     with open(SAMPLE_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
 
 
 def run_save_frames_for_json(json_path: Path, frame_at: str = "center"):
-    """Call the demo/save_phoneme_frames.py script as subprocess to save frames for a single JSON file"""
+    """
+    Call demo/save_phoneme_frames.py as a subprocess.
+
+    Save frames for one phoneme JSON file.
+    """
     script = HERE / "save_phoneme_frames.py"
-    cmd = [sys.executable, str(script), "--json", str(json_path), "--outdir", str(PHONEME_FRAMES_DIR.name), "--frame-at", frame_at]
+    cmd = [
+        sys.executable,
+        str(script),
+        "--json",
+        str(json_path),
+        "--outdir",
+        str(PHONEME_FRAMES_DIR.name),
+        "--frame-at",
+        frame_at,
+    ]
     subprocess.check_call(cmd, cwd=str(HERE))
 
 
@@ -121,13 +138,23 @@ def main(limit: int = None, frame_at: str = "center"):
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(out_payload, f, indent=2)
 
-    print(f"\n✅ Saved equal-partition batch results to {OUTPUT_FILE}")
+    print("\n\N{WHITE HEAVY CHECK MARK} Saved batch results to")
+    print(OUTPUT_FILE)
 
 
 if __name__ == "__main__":
-    import sys
     parser = argparse.ArgumentParser()
-    parser.add_argument("--limit", type=int, default=None, help="Limit number of samples to process (useful for smoke tests)")
-    parser.add_argument("--frame-at", choices=["center", "start"], default="center", help="Where to capture frame within phoneme")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Limit number of samples to process (useful for smoke tests)",
+    )
+    parser.add_argument(
+        "--frame-at",
+        choices=["center", "start"],
+        default="center",
+        help="Where to capture frame within phoneme",
+    )
     args = parser.parse_args()
     main(limit=args.limit, frame_at=args.frame_at)

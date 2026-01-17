@@ -10,8 +10,6 @@ Script to save labelled video frames for phoneme inspection.
 
 import argparse
 import json
-import os
-import sys
 from pathlib import Path
 import cv2
 
@@ -37,28 +35,45 @@ def collect_phoneme_entries(data):
     if isinstance(data, dict) and "words" in data:
         for w in data["words"]:
             for p in w.get("phonemes", []):
-                entries.append({
-                    "phoneme": p["phoneme"],
-                    "word": w.get("word", p.get("word")),
-                    "start_time": p["start_time"],
-                    "end_time": p["end_time"],
-                })
+                entries.append(
+                    {
+                        "phoneme": p["phoneme"],
+                        "word": w.get("word", p.get("word")),
+                        "start_time": p["start_time"],
+                        "end_time": p["end_time"],
+                    }
+                )
         return entries
 
-    if isinstance(data, dict) and "phonemes" in data and isinstance(data["phonemes"], list):
+    if (
+        isinstance(data, dict)
+        and "phonemes" in data
+        and isinstance(data["phonemes"], list)
+    ):
         for p in data["phonemes"]:
-            entries.append({
-                "phoneme": p.get("label") or p.get("phoneme") or p.get("phone"),
-                "word": p.get("word") or p.get("lexical" ) or "",
-                "start_time": float(p.get("start_time", p.get("start", 0.0))),
-                "end_time": float(p.get("end_time", p.get("end", 0.0))),
-            })
+            entries.append(
+                {
+                    "phoneme": (
+                        p.get("label") or p.get("phoneme") or p.get("phone")
+                    ),
+                    "word": p.get("word") or p.get("lexical") or "",
+                    "start_time": float(
+                        p.get("start_time", p.get("start", 0.0))
+                    ),
+                    "end_time": float(
+                        p.get("end_time", p.get("end", 0.0))
+                    ),
+                }
+            )
         return entries
     return entries
 
 
 def extract_frame_opencv(video_path: Path, timestamp: float):
-    """Return an OpenCV BGR image extracted at timestamp (seconds) or None on failure."""
+    """
+    Return an OpenCV BGR image extracted at timestamp (seconds) or None
+    on failure.
+    """
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         return None
@@ -78,7 +93,9 @@ def annotate_opencv_image(img, text: str):
     thickness = 2
     margin = 6
 
-    (text_w, text_h), baseline = cv2.getTextSize(text, font, font_scale, thickness)
+    (text_w, text_h), baseline = cv2.getTextSize(
+        text, font, font_scale, thickness
+    )
     rect_h = text_h + margin * 2
     rect_w = text_w + margin * 2
 
@@ -88,17 +105,42 @@ def annotate_opencv_image(img, text: str):
     cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
 
     text_org = (margin, margin + text_h)
-    cv2.putText(img, text, text_org, font, font_scale, (255, 255, 255), thickness, lineType=cv2.LINE_AA)
+    cv2.putText(
+        img,
+        text,
+        text_org,
+        font,
+        font_scale,
+        (255, 255, 255),
+        thickness,
+        lineType=cv2.LINE_AA,
+    )
     return img
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--json", default="phoneme_extraction_equal_partition.json", help="Phoneme JSON file to read")
-    parser.add_argument("--outdir", default="phoneme_frames", help="Output frames directory (under demo/)")
-    parser.add_argument("--frame-at", choices=["center", "start"], default="center", help="Where to capture frame in phoneme interval")
+    parser.add_argument(
+        "--json",
+        default="phoneme_extraction_equal_partition.json",
+        help="Phoneme JSON file to read",
+    )
+    parser.add_argument(
+        "--outdir",
+        default="phoneme_frames",
+        help="Output frames directory (under demo/)",
+    )
+    parser.add_argument(
+        "--frame-at",
+        choices=["center", "start"],
+        default="center",
+        help="Where to capture frame in phoneme interval",
+    )
     args = parser.parse_args()
-    json_path = Path(__file__).parent / args.json if not Path(args.json).is_absolute() else Path(args.json)
+    if Path(args.json).is_absolute():
+        json_path = Path(args.json)
+    else:
+        json_path = Path(__file__).parent / args.json
     if not json_path.exists():
         print(f"JSON file not found: {json_path}")
         return
@@ -108,11 +150,16 @@ def main():
 
     video_path = find_video_path(data)
     if video_path is None:
-        if isinstance(data, dict) and "video_file" in data.get("phoneme_extraction", {}):
-            video_path = Path(data["phoneme_extraction"]["video_file"])
+        if isinstance(data, dict):
+            pe = data.get("phoneme_extraction", {})
+            if "video_file" in pe:
+                video_path = Path(pe["video_file"])
 
     if video_path is None or not video_path.exists():
-        print("Video file not found in JSON. Please provide an absolute path or place the video next to the JSON.")
+        print(
+            "Video file not found in JSON. Please provide an absolute path"
+            " or place the video next to the JSON."
+        )
         return
 
     entries = collect_phoneme_entries(data)
@@ -123,7 +170,11 @@ def main():
     out_root = Path(__file__).parent / args.outdir / video_path.stem
     out_root.mkdir(parents=True, exist_ok=True)
 
-    print(f"Extracting {len(entries)} frames from {video_path} into {out_root}...")
+    print(
+        "Extracting {} frames from {} into {}...".format(
+            len(entries), video_path, out_root
+        )
+    )
 
     for i, e in enumerate(entries, 1):
         start = float(e.get("start_time", 0.0))
@@ -142,7 +193,9 @@ def main():
                 print(f"Failed to read frame #{i} at {t:.3f}s")
                 continue
 
-            annotated = annotate_opencv_image(frame, f"{safe_ph}  ({safe_word})")
+            annotated = annotate_opencv_image(
+                frame, "{}  ({})".format(safe_ph, safe_word)
+            )
             cv2.imwrite(str(out_img), annotated)
         except Exception as exc:
             print(f"Failed to extract/annotate frame #{i} at {t:.3f}s: {exc}")

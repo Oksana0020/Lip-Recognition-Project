@@ -20,8 +20,11 @@ def ensure_cmudict() -> object:
         return cmudict
     except Exception:
         print("NLTK or cmudict not available — installing/downloading now...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"], stdout=subprocess.DEVNULL)
-        import nltk  
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "nltk"],
+            stdout=subprocess.DEVNULL,
+        )
+        import nltk
 
         try:
             nltk.data.find("corpora/cmudict")
@@ -97,7 +100,8 @@ def word_to_phonemes(word: str) -> List[str]:
 
 def find_grid_videos_and_alignments() -> List[Dict]:
     """Discover video+alignment pairs in the GRID dataset (s1 speaker)."""
-    grid_root = Path(__file__).parent.parent / "data" / "grid" / "GRID dataset full"
+    root = Path(__file__).parent.parent
+    grid_root = root / "data" / "grid" / "GRID dataset full"
     videos_dir = grid_root / "s1"
     aligns_dir = grid_root / "alignments" / "s1"
 
@@ -112,7 +116,13 @@ def find_grid_videos_and_alignments() -> List[Dict]:
         vpath = videos_dir / fn
         apath = aligns_dir / f"{base}.align"
         if apath.exists():
-            pairs.append({"video_path": vpath, "alignment_path": apath, "base_name": base})
+            pairs.append(
+                {
+                    "video_path": vpath,
+                    "alignment_path": apath,
+                    "base_name": base,
+                }
+            )
 
     return pairs
 
@@ -142,7 +152,9 @@ def extract_words_from_alignment(alignment_file: Path) -> List[Dict]:
     return words
 
 
-def extract_phonemes_equal_partition(video_file: Path, alignment_file: Path) -> Dict:
+def extract_phonemes_equal_partition(
+    video_file: Path, alignment_file: Path
+) -> Dict:
     words = extract_words_from_alignment(alignment_file)
     words_out: List[Dict] = []
     phoneme_entries: List[Dict] = []
@@ -186,7 +198,9 @@ def extract_phonemes_equal_partition(video_file: Path, alignment_file: Path) -> 
         "total_words": len(words_out),
         "total_phonemes": len(phoneme_entries),
         "unique_phonemes": list(set(p["phoneme"] for p in phoneme_entries)),
-        "unique_phoneme_count": len(set(p["phoneme"] for p in phoneme_entries)),
+        "unique_phoneme_count": len(
+            set(p["phoneme"] for p in phoneme_entries)
+        ),
         "alignment_method": "equal_partition",
         "phoneme_intervals": phoneme_entries,
     }
@@ -227,7 +241,8 @@ def main():
         "phoneme_extraction": out,
     }
 
-    out_json = Path(__file__).parent / "phoneme_extraction_equal_partition.json"
+    out_json_dir = Path(__file__).parent
+    out_json = out_json_dir / "phoneme_extraction_equal_partition.json"
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
 

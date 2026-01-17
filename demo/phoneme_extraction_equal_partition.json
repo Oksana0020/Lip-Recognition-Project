@@ -1,8 +1,8 @@
 {
-  "video_processed": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbaf2n.mpg",
-  "alignment_file": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\alignments\\s1\\bbaf2n.align",
+  "video_processed": "data\\grid\\GRID dataset full\\s1\\bbaf2n.mpg",
+  "alignment_file": "data\\grid\\GRID dataset full\\alignments\\s1\\bbaf2n.align",
   "phoneme_extraction": {
-    "video_file": "C:\\Lip-Recognition-Project-main\\Lip-Recognition-Project-main\\data\\grid\\GRID dataset full\\s1\\bbaf2n.mpg",
+    "video_file": "data\\grid\\GRID dataset full\\s1\\bbaf2n.mpg",
     "sentence": "bin blue at f two now",
     "words": [
       {
@@ -231,16 +231,16 @@
     "total_words": 6,
     "total_phonemes": 14,
     "unique_phonemes": [
-      "L",
       "AW",
-      "F",
-      "N",
-      "EH",
       "AE",
+      "N",
       "T",
-      "B",
+      "EH",
+      "IH",
+      "L",
+      "F",
       "UW",
-      "IH"
+      "B"
     ],
     "unique_phoneme_count": 10,
     "alignment_method": "equal_partition",
