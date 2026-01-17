@@ -13,8 +13,10 @@ import json
 
 # Constants
 LIP_IDX = list(range(48, 68))  # mouth region indices
-MODEL_PATH = Path(__file__).parent.parent / "shape_predictor_68_face_landmarks.dat"
+BASE_DIR = Path(__file__).parent.parent
+MODEL_PATH = BASE_DIR / "shape_predictor_68_face_landmarks.dat"
 OUTPUT_DIR = Path(__file__).parent / "lip_regions"
+
 
 def extract_lip_regions_from_video(video_path: Path, max_frames: int = 10):
     """Extract up to `max_frames` lip crops and save."""
@@ -68,7 +70,13 @@ def extract_lip_regions_from_video(video_path: Path, max_frames: int = 10):
 
         face = faces[0]
         shape = predictor(gray, face)
-        pts = np.array([(shape.part(i).x, shape.part(i).y) for i in LIP_IDX], dtype=np.int32)
+        pts = np.array(
+            [
+                (shape.part(i).x, shape.part(i).y)
+                for i in LIP_IDX
+            ],
+            dtype=np.int32,
+        )
 
         x_min, y_min = pts.min(axis=0)
         x_max, y_max = pts.max(axis=0)
@@ -111,7 +119,16 @@ def extract_lip_regions_from_video(video_path: Path, max_frames: int = 10):
         })
         processed += 1
 
-        print(f"Frame {frame_id:6d} | Time: {frame_time:6.3f}s | Lip: {x1 - x0}x{y1 - y0} | Saved: {path_orig.name}, {path_96.name}")
+        print(
+            "Frame {:6d} | Time: {:6.3f}s | Lip: {}x{} | Saved: {}, {}".format(
+                frame_id,
+                frame_time,
+                x1 - x0,
+                y1 - y0,
+                path_orig.name,
+                path_96.name,
+            )
+        )
 
     cap.release()
 
@@ -125,21 +142,23 @@ def extract_lip_regions_from_video(video_path: Path, max_frames: int = 10):
     print("\nEXTRACTION COMPLETE")
     print(f"PROCESSED: {processed} frames with lip regions")
     print(f"SAVED TO: {OUTPUT_DIR}")
-    print(f"FINAL MODEL CROP: 96×96 (color)")
+    print("FINAL MODEL CROP: 96×96 (color)")
     print(f"AVERAGE LIP BOX: {avg_w:.1f}×{avg_h:.1f} pixels\n")
 
     # JSON summary
     json_path = OUTPUT_DIR.parent / "lip_extraction_results.json"
+    summary = {
+        "video": str(video_path),
+        "fps": fps,
+        "total_frames": total_frames,
+        "duration": duration,
+        "processed": processed,
+        "average_lip_box": [avg_w, avg_h],
+        "lip_regions": results,
+    }
+
     with open(json_path, "w", encoding="utf-8") as f:
-        json.dump({
-            "video": str(video_path),
-            "fps": fps,
-            "total_frames": total_frames,
-            "duration": duration,
-            "processed": processed,
-            "average_lip_box": [avg_w, avg_h],
-            "lip_regions": results
-        }, f, indent=2)
+        json.dump(summary, f, indent=2)
 
     print(f"Results saved to: {json_path.name}")
     return results
@@ -147,7 +166,7 @@ def extract_lip_regions_from_video(video_path: Path, max_frames: int = 10):
 
 if __name__ == "__main__":
     # try first GRID video
-    s1 = Path(__file__).parent.parent / "data" / "grid" / "GRID dataset full" / "s1"
+    s1 = BASE_DIR / "data" / "grid" / "GRID dataset full" / "s1"
     vids = sorted(s1.glob("*.mpg")) if s1.exists() else []
     if not vids:
         print("No .mpg videos found in data/grid/GRID dataset full/s1/")
