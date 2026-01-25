@@ -10,6 +10,10 @@ MFA demo on GRID:
 - Attach word labels to phonemes + group phones by words
 - Export JSON with phoneme intervals
 - Save 1 labeled frame per phoneme midpoint
+References:
+- GRID Audio-Visual Corpus: http://spandh.dcs.shef.ac.uk/gridcorpus/
+- Montreal Forced Aligner: https://montreal-forced-aligner.readthedocs.io/
+- CMU Pronouncing Dictionary: http://www.speech.cs.cmu.edu/cgi-bin/cmudict
 """
 
 import argparse
@@ -18,7 +22,6 @@ import sys
 import shutil
 import subprocess
 import tempfile
-import os
 from pathlib import Path
 from typing import Optional, Dict, List
 import re
@@ -33,6 +36,10 @@ except Exception:
     print("OpenCV not available")
 
 
+# CMU Pronouncing Dictionary (CMUdict)
+# Source: http://www.speech.cs.cmu.edu/cgi-bin/cmudict
+# ARPABET phonetic transcription system documentation
+# https://en.wikipedia.org/wiki/ARPABET
 def ensure_cmudict() -> object:
     try:
         from nltk.corpus import cmudict
@@ -54,6 +61,8 @@ cmudict_module = ensure_cmudict()
 cmudict_dictionary = cmudict_module.dict()
 
 
+# Letter to spoken name mapping for single-character words
+# Adapted from standard English alphabet pronunciation
 _letter_name_map = {
     "a": "a", "b": "bee", "c": "see", "d": "dee", "e": "ee", "f": "ef",
     "g": "gee", "h": "aitch", "i": "eye", "j": "jay", "k": "kay", "l": "el",
@@ -63,6 +72,8 @@ _letter_name_map = {
 }
 
 # Common ARPABET -> model phone mapping (english_mfa)
+# Taken and adapted from Montreal Forced Aligner documentation
+# https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/dictionary.html
 _arpabet_to_model = {
     "AA": "ɑ", "AE": "æ", "AH": "ə", "AO": "ɔ", "AW": "aw", "AY": "aj",
     "B": "b", "CH": "tʃ", "D": "d", "DH": "ð", "EH": "ɛ", "ER": "ɜ",
@@ -137,6 +148,8 @@ def extract_words_from_alignment(alignment_file: Path) -> List[Dict]:
     return words
 
 
+# TextGrid format specification (Praat)
+# Reference https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
 def _parse_textgrid_phones(tg_file: Path) -> List[Dict]:
     phone_intervals: List[Dict] = []
     in_phones_tier = False
@@ -386,9 +399,12 @@ def save_phoneme_frames(
         mid_t = 0.5 * (
             float(ph.get("start_time", 0.0)) + float(ph.get("end_time", 0.0))
         )
-        out_path = out_dir / (
-            f"{video_file.stem}_{idx:03d}_{ph.get('phoneme','unk')}_{mid_t:.3f}s.jpg"
+        fname = (
+            f"{video_file.stem}_{idx:03d}_"
+            f"{ph.get('phoneme', 'unk')}_{mid_t:.3f}s.jpg"
         )
+        out_path = out_dir / fname
+
         cmd = [
             ffmpeg_bin, "-y", "-ss", f"{mid_t:.3f}", "-i", str(video_file),
             "-frames:v", "1", "-q:v", "2", str(out_path),
@@ -468,7 +484,7 @@ def main(
         if proc.returncode != 0 or not wav_path.exists():
             raise RuntimeError(proc.stderr.decode("utf-8", errors="ignore"))
 
-        # 2) Transcript from .align (keep old transcript behavior)
+        # 2) Transcript from .align
         align_words = extract_words_from_alignment(align_path)
         cleaned: List[str] = []
         for w in align_words:
@@ -519,24 +535,23 @@ def main(
         mfa_out = tmp / "mfa_output"
         mfa_out.mkdir(parents=True, exist_ok=True)
 
-        mfa_bin = shutil.which("mfa")
-        if not mfa_bin:
-            cand = Path(sys.prefix) / "Scripts" / (
-                "mfa.exe" if os.name == "nt" else "mfa"
-            )
-            if cand.exists():
-                mfa_bin = str(cand)
-
-        if not mfa_bin:
-            mfa_bin = "mfa"
-
+        # Using conda run to execute MFA (required for kalpy on Windows)
+        # kalpy is MFA's acoustic modeling backend and requires conda
+        # Reference: https://github.com/mmcauliffe/kalpy
+        # MFA installation guide
+        # https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html
         cmd = [
-            mfa_bin,
+            "C:/Users/oksan/miniconda3/Scripts/conda.exe",
+            "run",
+            "-n",
+            "base",
+            "mfa",
             "align",
             str(utter_dir),
             str(lex_path),
             "english_mfa",
             str(mfa_out),
+            "--clean",
         ]
         print("Running MFA:", " ".join(cmd))
         proc = subprocess.run(
@@ -614,11 +629,75 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tmpdir", type=str, default=None)
-    parser.add_argument("--keep-temp", action="store_true")
-    parser.add_argument("--outdir", type=str, default=None)
+    parser.add_argument(
+        "--tmpdir",
+        type=str,
+        default=None,
+        help="temporary folder for MFA corpus",
+    )
+    parser.add_argument(
+        "--keep-temp",
+        action="store_true",
+        help="do not remove MFA temp folder",
+    )
+    parser.add_argument(
+        "--outdir",
+        type=str,
+        default=None,
+        help="output root for frames",
+    )
+    parser.add_argument(
+        "--num-videos",
+        type=int,
+        default=2,
+        help="number of GRID videos to process",
+    )
     args = parser.parse_args()
 
     tmp = Path(args.tmpdir) if args.tmpdir else None
     out = Path(args.outdir) if args.outdir else None
-    main(tmpdir=tmp, keep_temp=args.keep_temp, out_root=out)
+
+    grid_root = Path(__file__).parent.parent
+    grid_data_path = grid_root / "data" / "grid" / "GRID dataset full"
+    videos_path = grid_data_path / "s1"
+    alignments_path = grid_data_path / "alignments" / "s1"
+
+    video_files = sorted(
+        [f for f in videos_path.iterdir() if f.suffix.lower() == ".mpg"]
+    )[:args.num_videos]
+    if not video_files:
+        print("No GRID video files found")
+        sys.exit(1)
+
+    print(f"\n{'='*70}")
+    print(f"Processing {len(video_files)} GRID videos with PURE MFA alignment")
+    print(f"{'='*70}\n")
+
+    results = []
+    for idx, video_file in enumerate(video_files, 1):
+        base = video_file.stem
+        align_file = alignments_path / f"{base}.align"
+
+        print(f"\n[{idx}/{len(video_files)}] Processing: {video_file.name}")
+        print(f"{'='*70}")
+
+        try:
+            result = main(
+                video_path=video_file,
+                align_path=align_file,
+                tmpdir=tmp,
+                keep_temp=args.keep_temp,
+                out_root=out,
+            )
+            results.append(result)
+            num_ph = len(result.get("phoneme_intervals", []))
+            print(f"✓ Success: {num_ph} phonemes extracted")
+        except Exception as e:
+            print(f"✗ Failed: {e}")
+            import traceback
+            traceback.print_exc()
+
+    print(f"\n{'='*70}")
+    print(f"SUMMARY: Processed {len(results)}/{len(video_files)} videos "
+          f"successfully")
+    print(f"{'='*70}")
