@@ -99,6 +99,48 @@ def cmu_pron_to_model_pron(cmu_phones: List[str]) -> List[str]:
     return model_phones
 
 
+def ensure_mfa_model(model_name: str = "english_mfa") -> bool:
+    """Ensure MFA acoustic model is downloaded."""
+    check_cmd = [
+        "C:/Users/oksan/miniconda3/Scripts/conda.exe",
+        "run",
+        "-n",
+        "base",
+        "mfa",
+        "model",
+        "list",
+        "acoustic",
+    ]
+    
+    result = subprocess.run(
+        check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
+    
+    if model_name in result.stdout:
+        return True
+    
+    print(f"Downloading MFA acoustic model: {model_name}")
+    download_cmd = [
+        "C:/Users/oksan/miniconda3/Scripts/conda.exe",
+        "run",
+        "-n",
+        "base",
+        "mfa",
+        "model",
+        "download",
+        "acoustic",
+        model_name,
+    ]
+    
+    proc = subprocess.run(download_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode != 0:
+        print(f"ERROR downloading model: {proc.stderr.decode('utf-8', errors='ignore')}")
+        return False
+    
+    print(f"✓ Model {model_name} downloaded successfully")
+    return True
+
+
 def get_ffmpeg_path() -> str:
     project_ffmpeg = (
         Path(__file__).parent.parent / "tools" / "ffmpeg" / "ffmpeg.exe"
@@ -424,6 +466,7 @@ def main(
     tmpdir: Optional[Path] = None,
     keep_temp: bool = False,
     out_root: Optional[Path] = None,
+    skip_model_check: bool = False,
 ) -> Dict:
     if video_path is None or align_path is None:
         grid_root = Path(__file__).parent.parent
@@ -460,6 +503,11 @@ def main(
     utter_dir.mkdir(parents=True, exist_ok=True)
 
     try:
+        # 0) Ensure MFA model is downloaded (skip if already checked in batch)
+        if not skip_model_check:
+            if not ensure_mfa_model("english_mfa"):
+                raise RuntimeError("Failed to download MFA acoustic model")
+        
         # 1) Extract WAV
         wav_path = utter_dir / f"{video_path.stem}.wav"
         ffmpeg_bin = get_ffmpeg_path()
