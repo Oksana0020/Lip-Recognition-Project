@@ -1,0 +1,386 @@
+{
+  "video": "C:\\Users\\oksan\\LipRecognitionFYP\\data\\grid\\GRID dataset full\\s1\\lgiz2n.mpg",
+  "textgrid": "C:\\Users\\oksan\\AppData\\Local\\Temp\\tmpuqmgyqme\\mfa_output\\lgiz2n.TextGrid",
+  "transcript": "lay green in z two now",
+  "alignment_method": "mfa_pure",
+  "phoneme_intervals": [
+    {
+      "phoneme": "SIL",
+      "start_time": 0.0,
+      "end_time": 0.6,
+      "duration": 0.6,
+      "start_frame": 0,
+      "end_frame": 15000,
+      "frame_count": 15000,
+      "alignment_method": "mfa"
+    },
+    {
+      "phoneme": "L",
+      "start_time": 0.6,
+      "end_time": 0.66,
+      "duration": 0.06000000000000005,
+      "start_frame": 15000,
+      "end_frame": 16500,
+      "frame_count": 1500,
+      "alignment_method": "mfa",
+      "word": "lay"
+    },
+    {
+      "phoneme": "EY",
+      "start_time": 0.66,
+      "end_time": 0.76,
+      "duration": 0.09999999999999998,
+      "start_frame": 16500,
+      "end_frame": 19000,
+      "frame_count": 2500,
+      "alignment_method": "mfa",
+      "word": "lay"
+    },
+    {
+      "phoneme": "G",
+      "start_time": 0.76,
+      "end_time": 0.87,
+      "duration": 0.10999999999999999,
+      "start_frame": 19000,
+      "end_frame": 21750,
+      "frame_count": 2750,
+      "alignment_method": "mfa",
+      "word": "green"
+    },
+    {
+      "phoneme": "R",
+      "start_time": 0.87,
+      "end_time": 0.91,
+      "duration": 0.040000000000000036,
+      "start_frame": 21750,
+      "end_frame": 22750,
+      "frame_count": 1000,
+      "alignment_method": "mfa",
+      "word": "green"
+    },
+    {
+      "phoneme": "IY",
+      "start_time": 0.91,
+      "end_time": 0.97,
+      "duration": 0.05999999999999994,
+      "start_frame": 22750,
+      "end_frame": 24250,
+      "frame_count": 1500,
+      "alignment_method": "mfa",
+      "word": "green"
+    },
+    {
+      "phoneme": "N",
+      "start_time": 0.97,
+      "end_time": 1.01,
+      "duration": 0.040000000000000036,
+      "start_frame": 24250,
+      "end_frame": 25250,
+      "frame_count": 1000,
+      "alignment_method": "mfa",
+      "word": "green"
+    },
+    {
+      "phoneme": "IH",
+      "start_time": 1.01,
+      "end_time": 1.04,
+      "duration": 0.030000000000000027,
+      "start_frame": 25250,
+      "end_frame": 26000,
+      "frame_count": 750,
+      "alignment_method": "mfa",
+      "word": "in"
+    },
+    {
+      "phoneme": "N",
+      "start_time": 1.04,
+      "end_time": 1.08,
+      "duration": 0.040000000000000036,
+      "start_frame": 26000,
+      "end_frame": 27000,
+      "frame_count": 1000,
+      "alignment_method": "mfa",
+      "word": "in"
+    },
+    {
+      "phoneme": "Z",
+      "start_time": 1.08,
+      "end_time": 1.12,
+      "duration": 0.040000000000000036,
+      "start_frame": 27000,
+      "end_frame": 28000,
+      "frame_count": 1000,
+      "alignment_method": "mfa",
+      "word": "z"
+    },
+    {
+      "phoneme": "IY",
+      "start_time": 1.12,
+      "end_time": 1.19,
+      "duration": 0.06999999999999984,
+      "start_frame": 28000,
+      "end_frame": 29750,
+      "frame_count": 1750,
+      "alignment_method": "mfa",
+      "word": "z"
+    },
+    {
+      "phoneme": "T",
+      "start_time": 1.19,
+      "end_time": 1.36,
+      "duration": 0.17000000000000015,
+      "start_frame": 29750,
+      "end_frame": 34000,
+      "frame_count": 4250,
+      "alignment_method": "mfa",
+      "word": "two"
+    },
+    {
+      "phoneme": "UW",
+      "start_time": 1.36,
+      "end_time": 1.47,
+      "duration": 0.10999999999999988,
+      "start_frame": 34000,
+      "end_frame": 36750,
+      "frame_count": 2750,
+      "alignment_method": "mfa",
+      "word": "two"
+    },
+    {
+      "phoneme": "N",
+      "start_time": 1.47,
+      "end_time": 1.52,
+      "duration": 0.050000000000000044,
+      "start_frame": 36750,
+      "end_frame": 38000,
+      "frame_count": 1250,
+      "alignment_method": "mfa",
+      "word": "now"
+    },
+    {
+      "phoneme": "AW",
+      "start_time": 1.52,
+      "end_time": 1.8,
+      "duration": 0.28,
+      "start_frame": 38000,
+      "end_frame": 45000,
+      "frame_count": 7000,
+      "alignment_method": "mfa",
+      "word": "now"
+    },
+    {
+      "phoneme": "SIL",
+      "start_time": 1.8,
+      "end_time": 2.978,
+      "duration": 1.1780000000000002,
+      "start_frame": 45000,
+      "end_frame": 74450,
+      "frame_count": 29450,
+      "alignment_method": "mfa"
+    }
+  ],
+  "word_groups": [
+    {
+      "word": "lay",
+      "start_time": 0.6,
+      "end_time": 0.76,
+      "phonemes": [
+        {
+          "phoneme": "L",
+          "start_time": 0.6,
+          "end_time": 0.66,
+          "duration": 0.06000000000000005,
+          "start_frame": 15000,
+          "end_frame": 16500,
+          "frame_count": 1500,
+          "alignment_method": "mfa",
+          "word": "lay"
+        },
+        {
+          "phoneme": "EY",
+          "start_time": 0.66,
+          "end_time": 0.76,
+          "duration": 0.09999999999999998,
+          "start_frame": 16500,
+          "end_frame": 19000,
+          "frame_count": 2500,
+          "alignment_method": "mfa",
+          "word": "lay"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "green",
+      "start_time": 0.76,
+      "end_time": 1.01,
+      "phonemes": [
+        {
+          "phoneme": "G",
+          "start_time": 0.76,
+          "end_time": 0.87,
+          "duration": 0.10999999999999999,
+          "start_frame": 19000,
+          "end_frame": 21750,
+          "frame_count": 2750,
+          "alignment_method": "mfa",
+          "word": "green"
+        },
+        {
+          "phoneme": "R",
+          "start_time": 0.87,
+          "end_time": 0.91,
+          "duration": 0.040000000000000036,
+          "start_frame": 21750,
+          "end_frame": 22750,
+          "frame_count": 1000,
+          "alignment_method": "mfa",
+          "word": "green"
+        },
+        {
+          "phoneme": "IY",
+          "start_time": 0.91,
+          "end_time": 0.97,
+          "duration": 0.05999999999999994,
+          "start_frame": 22750,
+          "end_frame": 24250,
+          "frame_count": 1500,
+          "alignment_method": "mfa",
+          "word": "green"
+        },
+        {
+          "phoneme": "N",
+          "start_time": 0.97,
+          "end_time": 1.01,
+          "duration": 0.040000000000000036,
+          "start_frame": 24250,
+          "end_frame": 25250,
+          "frame_count": 1000,
+          "alignment_method": "mfa",
+          "word": "green"
+        }
+      ],
+      "phoneme_count": 4
+    },
+    {
+      "word": "in",
+      "start_time": 1.01,
+      "end_time": 1.08,
+      "phonemes": [
+        {
+          "phoneme": "IH",
+          "start_time": 1.01,
+          "end_time": 1.04,
+          "duration": 0.030000000000000027,
+          "start_frame": 25250,
+          "end_frame": 26000,
+          "frame_count": 750,
+          "alignment_method": "mfa",
+          "word": "in"
+        },
+        {
+          "phoneme": "N",
+          "start_time": 1.04,
+          "end_time": 1.08,
+          "duration": 0.040000000000000036,
+          "start_frame": 26000,
+          "end_frame": 27000,
+          "frame_count": 1000,
+          "alignment_method": "mfa",
+          "word": "in"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "z",
+      "start_time": 1.08,
+      "end_time": 1.19,
+      "phonemes": [
+        {
+          "phoneme": "Z",
+          "start_time": 1.08,
+          "end_time": 1.12,
+          "duration": 0.040000000000000036,
+          "start_frame": 27000,
+          "end_frame": 28000,
+          "frame_count": 1000,
+          "alignment_method": "mfa",
+          "word": "z"
+        },
+        {
+          "phoneme": "IY",
+          "start_time": 1.12,
+          "end_time": 1.19,
+          "duration": 0.06999999999999984,
+          "start_frame": 28000,
+          "end_frame": 29750,
+          "frame_count": 1750,
+          "alignment_method": "mfa",
+          "word": "z"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "two",
+      "start_time": 1.19,
+      "end_time": 1.47,
+      "phonemes": [
+        {
+          "phoneme": "T",
+          "start_time": 1.19,
+          "end_time": 1.36,
+          "duration": 0.17000000000000015,
+          "start_frame": 29750,
+          "end_frame": 34000,
+          "frame_count": 4250,
+          "alignment_method": "mfa",
+          "word": "two"
+        },
+        {
+          "phoneme": "UW",
+          "start_time": 1.36,
+          "end_time": 1.47,
+          "duration": 0.10999999999999988,
+          "start_frame": 34000,
+          "end_frame": 36750,
+          "frame_count": 2750,
+          "alignment_method": "mfa",
+          "word": "two"
+        }
+      ],
+      "phoneme_count": 2
+    },
+    {
+      "word": "now",
+      "start_time": 1.47,
+      "end_time": 1.8,
+      "phonemes": [
+        {
+          "phoneme": "N",
+          "start_time": 1.47,
+          "end_time": 1.52,
+          "duration": 0.050000000000000044,
+          "start_frame": 36750,
+          "end_frame": 38000,
+          "frame_count": 1250,
+          "alignment_method": "mfa",
+          "word": "now"
+        },
+        {
+          "phoneme": "AW",
+          "start_time": 1.52,
+          "end_time": 1.8,
+          "duration": 0.28,
+          "start_frame": 38000,
+          "end_frame": 45000,
+          "frame_count": 7000,
+          "alignment_method": "mfa",
+          "word": "now"
+        }
+      ],
+      "phoneme_count": 2
+    }
+  ]
+}

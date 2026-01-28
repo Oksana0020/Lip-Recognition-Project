@@ -18,7 +18,7 @@ from mfa_phoneme_frame_extraction import (
 
 SCRIPT_DIR = Path(__file__).parent
 SAMPLE_PAIRS_PATH = SCRIPT_DIR / "sample_50_grid_pairs.json"
-BATCH_OUTPUT_PATH = SCRIPT_DIR / "batch_mfa_results.json"
+BATCH_OUTPUT_PATH = SCRIPT_DIR / "phoneme_extraction_mfa.json"
 DEFAULT_FRAMES_ROOT = SCRIPT_DIR / "phoneme_frames_mfa_50"
 
 
