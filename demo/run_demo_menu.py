@@ -4,6 +4,9 @@ Options:
  - extract lip regions with dlib
  - extract words from GRID video
  - extract phonemes with equal-partition method
+ - extract phonemes with MFA (2 videos)
+ - extract phonemes with MFA (50 videos)
+ - summarize MFA results
 """
 
 from pathlib import Path
@@ -16,33 +19,52 @@ DEMOS = [
         "Initial lip detection (initial_lip_detection.py)",
         "initial_testing/initial_lip_detection.py",
         "initial_testing",
+        None,
     ),
     (
         "Extract lip regions with dlib (extract_lip_regions_with_dlib.py)",
         "demo/extract_lip_regions_with_dlib.py",
         "demo",
+        None,
     ),
     (
         "Extract words from GRID video (extract_words_from_grid_video.py)",
         "demo/extract_words_from_grid_video.py",
         "demo",
+        None,
     ),
     (
         "Extract phonemes (equal partition)",
         "demo/extract_phonemes_equal_partition.py",
         "demo",
+        None,
     ),
     (
-        "Extract phonemes (MFA batch)",
+        "Extract phonemes with MFA (2 videos)",
         "demo/run_mfa_on_sample.py",
         "demo",
+        ["--limit", "2", "--outdir", "phoneme_frames_mfa_2test",
+         "--batch-output", "batch_mfa_2test_results.json"],
+    ),
+    (
+        "Extract phonemes with MFA (50 videos)",
+        "demo/run_mfa_on_sample.py",
+        "demo",
+        ["--limit", "50", "--outdir", "phoneme_frames_mfa_50"],
+    ),
+    (
+        "Summarize MFA results",
+        "demo/summarize_batch_mfa_results.py",
+        "demo",
+        None,
     ),
 ]
 
 
 def choose_demo() -> int:
     print("Choose a demo to run:")
-    for i, (label, _, _) in enumerate(DEMOS, 1):
+    for i, demo_item in enumerate(DEMOS, 1):
+        label = demo_item[0]
         print(f"  {i}. {label}")
     print("  0. Exit")
     while True:
@@ -56,7 +78,7 @@ def choose_demo() -> int:
     print("Choice out of range.")
 
 
-def run_demo(script_rel: str, workdir_rel: str):
+def run_demo(script_rel: str, workdir_rel: str, extra_args=None):
     repo_root = Path(__file__).parent.parent
     workdir = repo_root / workdir_rel
     script_path = repo_root / script_rel
@@ -77,6 +99,9 @@ def run_demo(script_rel: str, workdir_rel: str):
         script_arg = str(script_path)
 
     cmd = [sys.executable, script_arg]
+    if extra_args:
+        cmd.extend(extra_args)
+
     env = os.environ.copy()
     env_pythonpath = env.get("PYTHONPATH", "")
     if str(workdir) not in env_pythonpath.split(os.pathsep):
@@ -98,9 +123,13 @@ def main():
         if choice == 0:
             print("Goodbye")
             return
-        label, script, workdir = DEMOS[choice - 1]
+        demo_item = DEMOS[choice - 1]
+        label = demo_item[0]
+        script = demo_item[1]
+        workdir = demo_item[2]
+        extra_args = demo_item[3] if len(demo_item) > 3 else None
         print(f"Selected: {label}")
-        run_demo(script, workdir)
+        run_demo(script, workdir, extra_args)
         print("\nDemo finished.\n")
 
 
