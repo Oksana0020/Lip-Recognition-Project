@@ -23,7 +23,7 @@ from extract_phonemes_equal_partition import (
 
 HERE = Path(__file__).parent
 SAMPLE_FILE = HERE / "sample_50_grid_pairs.json"
-OUTPUT_FILE = HERE / "batch_equal_partition_results.json"
+OUTPUT_FILE = HERE / "phoneme_extraction_equal_partition.json"
 PHONEME_JSON_DIR = HERE / "phoneme_jsons"
 PHONEME_FRAMES_DIR = HERE / "phoneme_frames"
 
