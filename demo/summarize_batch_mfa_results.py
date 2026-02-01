@@ -1,8 +1,8 @@
 """
 Demo script summarize phoneme statistics from batch MFA extraction results.
-The script reads demo/batch_mfa_results.json and aggregates per-video and
+The script reads demo/batch_mfa_results.json and produces per-video and
 overall phoneme statistics, including total phoneme counts, unique phoneme
-counts, UNK frequency and sample of observed phoneme labels.
+counts, UNK frequency and unique sample of observed phonemes.
 """
 
 import json
@@ -10,7 +10,8 @@ from pathlib import Path
 
 
 def main() -> None:
-    batch_results_path = Path("batch_mfa_results.json")
+    script_dir = Path(__file__).parent
+    batch_results_path = script_dir / "batch_mfa_results.json"
     with batch_results_path.open(encoding="utf-8") as f:
         batch_data = json.load(f)
 

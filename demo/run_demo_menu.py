@@ -6,7 +6,8 @@ Options:
  - extract phonemes with equal-partition method
  - extract phonemes with MFA (2 videos)
  - extract phonemes with MFA (50 videos)
- - summarize MFA results
+ - summarize MFA results (50 videos)
+ - summarize equal partition results
 """
 
 from pathlib import Path
@@ -53,8 +54,14 @@ DEMOS = [
         ["--limit", "50", "--outdir", "phoneme_frames_mfa_50"],
     ),
     (
-        "Summarize MFA results",
+        "Summarize MFA results (50 videos)",
         "demo/summarize_batch_mfa_results.py",
+        "demo",
+        None,
+    ),
+    (
+        "Summarize equal partition results",
+        "demo/summarize_equal_partition_results.py",
         "demo",
         None,
     ),
