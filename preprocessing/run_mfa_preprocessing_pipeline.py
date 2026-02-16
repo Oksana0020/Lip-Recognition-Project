@@ -230,6 +230,91 @@ def step_1_extract_phonemes_mfa(
     return success_count > 0
 
 
+def step_2_reorganize_phonemes(input_root: Path, output_root: Path) -> bool:
+    """Reorganize interval JSONs into phoneme-labelled folders."""
+    _print_header("STEP 2: Reorganizing phoneme segments by phoneme label")
+
+    output_root.mkdir(parents=True, exist_ok=True)
+    json_files = list(input_root.glob("*_phoneme_intervals_mfa.json"))
+    print(f"Processing {len(json_files)} MFA phoneme interval files")
+
+    phoneme_count: Dict[str, int] = {}
+
+    for json_file in json_files:
+        try:
+            with json_file.open("r", encoding="utf-8") as file_handle:
+                data = json.load(file_handle)
+
+            intervals = data.get("phoneme_intervals", [])
+            for entry in intervals:
+                phoneme = str(entry["phoneme"]).upper()
+
+                if phoneme in {"SIL", "SP", "SPN"}:
+                    continue
+
+                phoneme_count[phoneme] = phoneme_count.get(phoneme, 0) + 1
+
+                phoneme_dir = output_root / phoneme
+                phoneme_dir.mkdir(parents=True, exist_ok=True)
+
+                start_frame = entry.get("start_frame", 0)
+                base_id = json_file.stem.replace("_phoneme_intervals_mfa", "")
+                out_name = f"{base_id}_{start_frame}_{phoneme}.json"
+                out_file = phoneme_dir / out_name
+
+                with out_file.open("w", encoding="utf-8") as out_handle:
+                    json.dump(entry, out_handle, indent=2)
+
+        except Exception as exc:
+            print(f"  ERROR processing {json_file.name}: {exc}")
+
+    print("\nReorganization complete:")
+    print(f"  Unique phonemes: {len(phoneme_count)}")
+    print(f"  Total segments: {sum(phoneme_count.values())}")
+    print(f"  Saved to: {output_root}")
+
+    print("\n  Top 10 phonemes by frequency:")
+    sorted_phonemes = sorted(
+        phoneme_count.items(),
+        key=lambda x: x[1],
+        reverse=True,
+    )
+    for phoneme, count in sorted_phonemes[:10]:
+        print(f"    {phoneme}: {count}")
+
+    return len(phoneme_count) > 0
+
+
+def verify_outputs(processed_root: Path) -> None:
+    """Verify the structure and contents of processed outputs."""
+    _print_header("VERIFICATION: Checking output structure")
+
+    checks = {
+        "phonemes_mfa (raw intervals)": processed_root / "phonemes_mfa",
+        "phonemes_by_label_mfa": processed_root / "phonemes_by_label_mfa",
+        "visemes_bozkurt_mfa": processed_root / "visemes_bozkurt_mfa",
+    }
+
+    for name, path in checks.items():
+        if path.exists() and path.is_dir():
+            subdirs = [d for d in path.iterdir() if d.is_dir()]
+            files = list(path.glob("*.json"))
+            if subdirs:
+                total_files = sum(
+                    1 for d in subdirs for f in d.iterdir() if f.is_file()
+                )
+                print(
+                    f"✓ {name}: {len(subdirs)} categories, "
+                    f"{total_files} files"
+                )
+            else:
+                print(f"✓ {name}: {len(files)} files")
+        else:
+            print(f"✗ {name}: NOT FOUND")
+
+    _print_header("MFA PREPROCESSING PIPELINE COMPLETE")
+
+
 def main() -> None:
     """Run MFA preprocessing pipeline (phoneme extraction only)."""
     parser = argparse.ArgumentParser(
@@ -260,6 +345,7 @@ def main() -> None:
     _print_header("GRID DATASET MFA PREPROCESSING PIPELINE")
     print("\nThis will process the GRID dataset using MFA and create:")
     print("  1. Phoneme intervals (MFA method)")
+    print("  2. Phoneme-based segments")
     print("\nAll outputs will be saved to: data/processed/ with _mfa suffix")
 
     if args.speakers:
@@ -272,6 +358,7 @@ def main() -> None:
 
     processed_root = ROOT_DIR / "data" / "processed"
     phonemes_raw_mfa = processed_root / "phonemes_mfa"
+    phonemes_by_label_mfa = processed_root / "phonemes_by_label_mfa"
 
     try:
         ok = step_1_extract_phonemes_mfa(
@@ -280,8 +367,18 @@ def main() -> None:
             args.start_from,
         )
         if not ok:
-            print("\nERROR: MFA phoneme extraction failed.")
+            print("\nERROR: MFA phoneme extraction failed. Aborting pipeline.")
             return
+
+        ok = step_2_reorganize_phonemes(
+            phonemes_raw_mfa,
+            phonemes_by_label_mfa,
+        )
+        if not ok:
+            print("\nERROR: Phoneme reorganization failed. Aborting pipeline.")
+            return
+
+        verify_outputs(processed_root)
 
         elapsed = time.time() - start_time
         print(f"\nTotal processing time: {elapsed / 60:.1f} minutes")
@@ -296,6 +393,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-#commit 1
-#Add MFA GRID phoneme interval extraction 
