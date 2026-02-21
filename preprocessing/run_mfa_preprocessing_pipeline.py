@@ -3,23 +3,27 @@ Complete MFA-based preprocessing pipeline for GRID dataset:
 1. Extract phoneme intervals from all GRID videos using MFA
    (Montreal Forced Aligner)
 2. Reorganize phoneme intervals into phoneme-labelled folders
-3. Save structured outputs to data/processed/ with _mfa suffix
+3. Map phonemes to visemes using Bozkurt mapping
+4. Save structured outputs to data/processed/ with _mfa suffix
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 import traceback
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 SCRIPT_DIR = Path(__file__).parent
 ROOT_DIR = SCRIPT_DIR.parent
+
 
 CONDA_EXE = "C:/Users/oksan/miniconda3/Scripts/conda.exe"
 DEFAULT_MODEL = "english_mfa"
@@ -30,7 +34,6 @@ def _load_mfa_extractor():
     demo_path = ROOT_DIR / "demo"
     if str(demo_path) not in sys.path:
         sys.path.insert(0, str(demo_path))
-
     import importlib
 
     module = importlib.import_module("mfa_phoneme_frame_extraction")
@@ -203,7 +206,8 @@ def step_1_extract_phonemes_mfa(
                 )
 
                 out_file = (
-                    output_root / f"{base_name}_phoneme_intervals_mfa.json"
+                    output_root
+                    / f"{base_name}_phoneme_intervals_mfa.json"
                 )
                 with out_file.open("w", encoding="utf-8") as file_handle:
                     json.dump(result, file_handle, indent=2)
@@ -285,6 +289,93 @@ def step_2_reorganize_phonemes(input_root: Path, output_root: Path) -> bool:
     return len(phoneme_count) > 0
 
 
+def load_viseme_map(mapping_file: Path) -> Dict[str, str]:
+    """Load Bozkurt viseme mapping from CSV (phoneme -> viseme)."""
+    viseme_map: Dict[str, str] = {}
+
+    with mapping_file.open("r", encoding="utf-8", newline="") as file_handle:
+        reader = csv.DictReader(file_handle)
+        for row in reader:
+            viseme = (row.get("viseme_class") or "").strip()
+            phonemes_str = (row.get("phonemes") or "").strip()
+            if not viseme or not phonemes_str:
+                continue
+
+            phonemes = [
+                p.strip().upper()
+                for p in phonemes_str.split(",")
+                if p.strip()
+            ]
+            for phoneme in phonemes:
+                viseme_map[phoneme] = viseme
+
+    return viseme_map
+
+
+def step_3_map_to_visemes(
+    phoneme_root: Path,
+    mapping_file: Path,
+    out_root: Path,
+    system_name: str,
+) -> bool:
+    """Map phoneme-labelled folders into viseme class folders."""
+    _print_header(
+        f"STEP 3: Mapping phonemes to visemes ({system_name} system)"
+    )
+
+    viseme_map = load_viseme_map(mapping_file)
+    viseme_classes = len(set(viseme_map.values()))
+    print(f"Loaded mapping with {viseme_classes} viseme classes")
+
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    viseme_counts: Dict[str, int] = {}
+    unmapped_phonemes: Set[str] = set()
+
+    for phoneme_dir in phoneme_root.iterdir():
+        if not phoneme_dir.is_dir():
+            continue
+
+        phoneme_label = phoneme_dir.name.upper()
+        viseme = viseme_map.get(phoneme_label)
+
+        if not viseme:
+            unmapped_phonemes.add(phoneme_label)
+            continue
+
+        viseme_dir = out_root / viseme
+        viseme_dir.mkdir(parents=True, exist_ok=True)
+
+        segment_count = 0
+        for seg_file in phoneme_dir.iterdir():
+            if seg_file.is_file():
+                shutil.copy(seg_file, viseme_dir / seg_file.name)
+                segment_count += 1
+
+        viseme_counts[viseme] = viseme_counts.get(viseme, 0) + segment_count
+
+    print(f"\nViseme mapping complete ({system_name}):")
+    print(f"  Viseme classes: {len(viseme_counts)}")
+    print(f"  Total segments: {sum(viseme_counts.values())}")
+    print(f"  Unmapped phonemes: {len(unmapped_phonemes)}")
+
+    if unmapped_phonemes:
+        print(f"  Unmapped: {sorted(unmapped_phonemes)}")
+
+    print(f"  Saved to: {out_root}")
+
+    print("\n  Viseme distribution:")
+    sorted_visemes = sorted(
+        viseme_counts.items(),
+        key=lambda x: x[1],
+        reverse=True,
+    )
+    for viseme, count in sorted_visemes:
+        print(f"    {viseme}: {count}")
+
+    return len(viseme_counts) > 0
+
+
 def verify_outputs(processed_root: Path) -> None:
     """Verify the structure and contents of processed outputs."""
     _print_header("VERIFICATION: Checking output structure")
@@ -313,10 +404,12 @@ def verify_outputs(processed_root: Path) -> None:
             print(f"✗ {name}: NOT FOUND")
 
     _print_header("MFA PREPROCESSING PIPELINE COMPLETE")
+    print("Data is ready to train models on viseme-level using:")
+    print("  - Bozkurt system (MFA): data/processed/visemes_bozkurt_mfa/")
 
 
 def main() -> None:
-    """Run MFA preprocessing pipeline (phoneme extraction only)."""
+    """Run the complete MFA preprocessing pipeline."""
     parser = argparse.ArgumentParser(
         description="Run MFA preprocessing pipeline on GRID dataset"
     )
@@ -346,6 +439,7 @@ def main() -> None:
     print("\nThis will process the GRID dataset using MFA and create:")
     print("  1. Phoneme intervals (MFA method)")
     print("  2. Phoneme-based segments")
+    print("  3. Viseme-based segments (Bozkurt system)")
     print("\nAll outputs will be saved to: data/processed/ with _mfa suffix")
 
     if args.speakers:
@@ -359,24 +453,39 @@ def main() -> None:
     processed_root = ROOT_DIR / "data" / "processed"
     phonemes_raw_mfa = processed_root / "phonemes_mfa"
     phonemes_by_label_mfa = processed_root / "phonemes_by_label_mfa"
+    visemes_bozkurt_mfa = processed_root / "visemes_bozkurt_mfa"
+
+    bozkurt_map = ROOT_DIR / "mapping" / "bozkurt_viseme_map.csv"
+    if not bozkurt_map.exists():
+        print(f"\nERROR: Bozkurt mapping file not found: {bozkurt_map}")
+        return
 
     try:
-        ok = step_1_extract_phonemes_mfa(
+        success = step_1_extract_phonemes_mfa(
             phonemes_raw_mfa,
             args.speakers,
             args.start_from,
         )
-        if not ok:
+        if not success:
             print("\nERROR: MFA phoneme extraction failed. Aborting pipeline.")
             return
 
-        ok = step_2_reorganize_phonemes(
+        success = step_2_reorganize_phonemes(
             phonemes_raw_mfa,
             phonemes_by_label_mfa,
         )
-        if not ok:
+        if not success:
             print("\nERROR: Phoneme reorganization failed. Aborting pipeline.")
             return
+
+        success = step_3_map_to_visemes(
+            phonemes_by_label_mfa,
+            bozkurt_map,
+            visemes_bozkurt_mfa,
+            "Bozkurt (MFA)",
+        )
+        if not success:
+            print("\nWARNING: Bozkurt viseme mapping produced no outputs.")
 
         verify_outputs(processed_root)
 
