@@ -1,8 +1,8 @@
 """
-Word-level extraction pipeline for the GRID dataset:
+Complete pipeline for word-level preprocessing for GRID dataset:
 1. Word extraction from videos using alignment files
-2. Saving word-level frames and metadata
-
+2. Saving word-level frame segments and metadata
+3. Statistics collection and summary reporting
 """
 
 from __future__ import annotations
@@ -35,7 +35,9 @@ def find_all_grid_videos() -> List[Dict[str, str]]:
         if not videos_path.exists() or not alignments_path.exists():
             continue
 
-        video_files = [f for f in os.listdir(videos_path) if f.endswith(".mpg")]
+        video_files = [
+            f for f in os.listdir(videos_path) if f.endswith(".mpg")
+        ]
 
         for video_file in video_files:
             base_name = os.path.splitext(video_file)[0]
@@ -98,7 +100,7 @@ def extract_word_frames(
     video_path: str,
     word_info: Dict[str, Any],
 ) -> Optional[np.ndarray]:
-    """Extract video frames corresponding to a word segment."""
+    """ Extract video frames corresponding to a word segment."""
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
 
@@ -136,7 +138,9 @@ def save_word_segment(
     word_dir = output_root / word_label
     word_dir.mkdir(parents=True, exist_ok=True)
 
-    filename = f"{video_name}_word_{int(word_info['start_frame'])}_{word_label}"
+    filename = (
+        f"{video_name}_word_{int(word_info['start_frame'])}_{word_label}"
+    )
 
     frames_file = word_dir / f"{filename}.npy"
     np.save(frames_file, frames)
@@ -171,11 +175,11 @@ def process_single_video(
     base_name = video_info["base_name"]
     speaker_id = video_info["speaker_id"]
 
-    words_extracted = 0
-    words_failed = 0
-
     try:
         word_alignments = parse_grid_alignment_file(alignment_path)
+
+        words_extracted = 0
+        words_failed = 0
 
         for word_info in word_alignments:
             if str(word_info["word"]).lower() == "sil":
@@ -195,12 +199,17 @@ def process_single_video(
             else:
                 words_failed += 1
 
+        total_words = sum(
+            1 for w in word_alignments if str(w["word"]).lower() != "sil"
+        )
+
         return {
             "video": base_name,
             "speaker_id": speaker_id,
             "status": "success",
             "words_extracted": words_extracted,
             "words_failed": words_failed,
+            "total_words": total_words,
         }
 
     except Exception as exc:
@@ -212,9 +221,87 @@ def process_single_video(
         }
 
 
-def main() -> None:
+def collect_word_statistics(output_root: Path) -> Dict[str, Any]:
+    """Compute and write summary statistics for extracted word segments."""
+    print("\nCollecting word statistics...")
+
+    word_stats: Dict[str, Any] = {}
+    total_samples = 0
+
+    word_dirs = [
+        d
+        for d in output_root.iterdir()
+        if d.is_dir() and not d.name.startswith(".")
+    ]
+
+    for word_dir in word_dirs:
+        word_label = word_dir.name
+        npy_files = list(word_dir.glob("*.npy"))
+        json_files = list(word_dir.glob("*.json"))
+
+        durations: List[float] = []
+        frame_counts: List[int] = []
+        speakers = set()
+
+        for json_file in json_files:
+            with open(json_file, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+            durations.append(float(metadata.get("duration", 0.0)))
+            frame_counts.append(int(metadata.get("num_frames", 0)))
+            speakers.add(metadata.get("speaker_id", "unknown"))
+
+        word_stats[word_label] = {
+            "count": len(npy_files),
+            "avg_duration": float(np.mean(durations)) if durations else 0.0,
+            "min_duration": float(np.min(durations)) if durations else 0.0,
+            "max_duration": float(np.max(durations)) if durations else 0.0,
+            "avg_frames": float(np.mean(frame_counts))
+            if frame_counts else 0.0,
+            "min_frames": int(np.min(frame_counts)) if frame_counts else 0,
+            "max_frames": int(np.max(frame_counts)) if frame_counts else 0,
+            "num_speakers": len(speakers),
+        }
+
+        total_samples += len(npy_files)
+
+    stats = {
+        "total_words": len(word_stats),
+        "total_samples": total_samples,
+        "word_statistics": word_stats,
+    }
+
+    stats_file = output_root / "word_statistics.json"
+    with open(stats_file, "w", encoding="utf-8") as f:
+        json.dump(stats, f, indent=2)
+
+    print("\n" + "=" * 60)
+    print("Word Statistics")
+    print("=" * 60)
+    print(f"Total unique words: {stats['total_words']}")
+    print(f"Total samples: {stats['total_samples']}")
+    print("\nPer-word breakdown:")
+    print(f"{'Word':<15} {'Count':<10} {'Avg Duration':<15} "
+          f"{'Avg Frames':<15}")
+    print("-" * 60)
+
+    for word, stat in sorted(
+        word_stats.items(),
+        key=lambda x: x[1]["count"],
+        reverse=True,
+    ):
+        print(
+            f"{word:<15} {stat['count']:<10} "
+            f"{stat['avg_duration']:<15.3f} {stat['avg_frames']:<15.1f}"
+        )
+
+    print(f"\nStatistics saved to: {stats_file}")
+    return stats
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    """Create and return the CLI argument parser."""
     parser = argparse.ArgumentParser(
-        description="Word-level extraction pipeline for GRID dataset",
+        description="Word-level preprocessing pipeline for GRID dataset",
     )
     parser.add_argument(
         "--output",
@@ -228,13 +315,18 @@ def main() -> None:
         default=None,
         help="Limit number of videos to process",
     )
+    return parser
+
+
+def main() -> None:
+    parser = build_arg_parser()
     args = parser.parse_args()
 
     output_root = BASE_DIR / args.output
     output_root.mkdir(parents=True, exist_ok=True)
 
     print("=" * 60)
-    print("GRID Word-Level Extraction Pipeline")
+    print("GRID Word-Level Preprocessing Pipeline")
     print("=" * 60)
     print(f"Output directory: {output_root}")
     if args.limit:
@@ -243,33 +335,56 @@ def main() -> None:
 
     print("Step 1: Finding GRID videos...")
     video_pairs = find_all_grid_videos()
+
     if args.limit:
         video_pairs = video_pairs[: args.limit]
+
     print(f"Found {len(video_pairs)} video-alignment pairs\n")
 
     print("Step 2: Extracting word segments from videos...")
-    total_extracted = 0
+    results: List[Dict[str, Any]] = []
+    total_words = 0
     total_failed = 0
-    failed_videos = 0
 
     for video_info in tqdm(video_pairs, desc="Processing videos"):
         result = process_single_video(video_info, output_root)
+        results.append(result)
 
         if result["status"] == "success":
-            total_extracted += int(result["words_extracted"])
+            total_words += int(result["words_extracted"])
             total_failed += int(result["words_failed"])
-        else:
-            failed_videos += 1
+
+    summary = {
+        "total_videos_processed": len(results),
+        "successful_videos": sum(1 for r in results
+                                 if r["status"] == "success"),
+        "failed_videos": sum(1 for r in results if r["status"] == "failed"),
+        "total_words_extracted": total_words,
+        "total_words_failed": total_failed,
+        "results": results,
+    }
+
+    summary_file = output_root / "extraction_summary.json"
+    with open(summary_file, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
 
     print("\n" + "=" * 60)
     print("Extraction Summary")
     print("=" * 60)
-    print(f"Videos processed: {len(video_pairs)}")
-    print(f"Videos failed: {failed_videos}")
-    print(f"Word segments extracted: {total_extracted}")
-    print(f"Word segments failed: {total_failed}")
+    print(f"Total videos processed: {summary['total_videos_processed']}")
+    print(f"Successful: {summary['successful_videos']}")
+    print(f"Failed: {summary['failed_videos']}")
+    print(f"Total words extracted: {total_words}")
+    print(f"Total words failed: {total_failed}")
+    print(f"Summary saved to: {summary_file}")
+
+    collect_word_statistics(output_root)
+
+    print("\n" + "=" * 60)
+    print("Pipeline Complete!")
     print("=" * 60)
-    print("Done.")
+    print(f"Word segments saved to: {output_root}")
+    print("Ready for word-level training!")
 
 
 if __name__ == "__main__":
