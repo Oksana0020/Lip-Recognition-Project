@@ -1,12 +1,13 @@
 """
 Bozkurt Viseme Recognition 3D CNN Training Script
 
-This script trains a 3D Convolutional Neural Network to recognize 16 viseme classes
-using Bozkurt viseme mapping system. Visemes group phonemes with similar mouth shapes.
+This script trains a 3D Convolutional Neural Network to recognize
+16 viseme classes using Bozkurt viseme mapping system.
+ Visemes group phonemes with similar mouth shapes.
 Bozkurt System: 16 viseme classes (S, V2-V16)
-
 """
 
+import json
 import os
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -73,12 +74,18 @@ class BozkurtVisemeTrainingConfig:
         self.validation_data_ratio = 0.15
         self.test_data_ratio = 0.15
 
-        self.checkpoint_save_directory = "training/checkpoints_bozkurt_viseme"
+        self.checkpoint_save_directory = (
+            "training/checkpoints_bozkurt_viseme"
+        )
         self.save_checkpoint_every_n_epochs = 5
         self.keep_best_model_only = True
 
         self.tensorboard_log_directory = "training/runs_bozkurt_viseme"
         self.print_training_progress_every_n_batches = 10
+
+        self.metrics_output_directory = "training/results_bozkurt_viseme"
+        self.training_history_filename = "training_history.json"
+        self.final_metrics_filename = "final_test_metrics.json"
 
         self.use_gpu_if_available = True
         self.device = self._setup_device()
@@ -124,17 +131,26 @@ class BozkurtVisemeLipReadingDataset(Dataset):
         }
 
         self.video_samples_list = self._load_all_samples()
-        print(f"Loaded {len(self.video_samples_list)} samples for {data_split} split")
+        print(
+            f"Loaded {len(self.video_samples_list)} samples "
+            f"for {data_split} split"
+        )
 
     def _load_all_samples(self) -> List[Dict]:
         """Scan directory and load all video sample paths with labels."""
         all_samples: List[Dict] = []
 
         for viseme_label in self.viseme_class_labels:
-            viseme_folder_path = os.path.join(self.data_root_directory, viseme_label)
+            viseme_folder_path = os.path.join(
+                self.data_root_directory,
+                viseme_label,
+            )
 
             if not os.path.exists(viseme_folder_path):
-                print(f"Warning: Folder not found for viseme '{viseme_label}'")
+                print(
+                    f"Warning: Folder not found for viseme "
+                    f"'{viseme_label}'"
+                )
                 continue
 
             for filename in os.listdir(viseme_folder_path):
@@ -142,8 +158,14 @@ class BozkurtVisemeLipReadingDataset(Dataset):
                     continue
 
                 npy_filename = filename.replace(".json", ".npy")
-                npy_file_path = os.path.join(viseme_folder_path, npy_filename)
-                json_file_path = os.path.join(viseme_folder_path, filename)
+                npy_file_path = os.path.join(
+                    viseme_folder_path,
+                    npy_filename,
+                )
+                json_file_path = os.path.join(
+                    viseme_folder_path,
+                    filename,
+                )
 
                 if not os.path.exists(npy_file_path):
                     continue
@@ -152,7 +174,9 @@ class BozkurtVisemeLipReadingDataset(Dataset):
                     "video_file_path": npy_file_path,
                     "metadata_file_path": json_file_path,
                     "viseme_label": viseme_label,
-                    "viseme_class_index": self.viseme_label_to_index[viseme_label],
+                    "viseme_class_index": (
+                        self.viseme_label_to_index[viseme_label]
+                    ),
                 }
                 all_samples.append(sample_info)
 
@@ -170,7 +194,10 @@ class BozkurtVisemeLipReadingDataset(Dataset):
         label_index = sample_info["viseme_class_index"]
         return video_tensor, label_index
 
-    def _process_video_frames(self, video_frames_array: np.ndarray) -> np.ndarray:
+    def _process_video_frames(
+        self,
+        video_frames_array: np.ndarray,
+    ) -> np.ndarray:
         """Resize, grayscale, normalize, and pad/sample to fixed length."""
         current_num_frames = video_frames_array.shape[0]
 
@@ -184,8 +211,14 @@ class BozkurtVisemeLipReadingDataset(Dataset):
             selected_frames = video_frames_array[frame_indices]
         else:
             padding_needed = self.sequence_length_frames - current_num_frames
-            last_frame = video_frames_array[-1:].repeat(padding_needed, axis=0)
-            selected_frames = np.concatenate([video_frames_array, last_frame], axis=0)
+            last_frame = video_frames_array[-1:].repeat(
+                padding_needed,
+                axis=0,
+            )
+            selected_frames = np.concatenate(
+                [video_frames_array, last_frame],
+                axis=0,
+            )
 
         processed_frames_list: List[np.ndarray] = []
         for frame in selected_frames:
@@ -195,7 +228,10 @@ class BozkurtVisemeLipReadingDataset(Dataset):
             )
 
             if len(resized_frame.shape) == 3:
-                grayscale_frame = cv2.cvtColor(resized_frame, cv2.COLOR_RGB2GRAY)
+                grayscale_frame = cv2.cvtColor(
+                    resized_frame,
+                    cv2.COLOR_RGB2GRAY,
+                )
             else:
                 grayscale_frame = resized_frame
 
@@ -286,7 +322,10 @@ class ThreeDimensionalCNN(nn.Module):
         features_4 = self.conv_block_4(features_3)
         pooled_features = self.adaptive_pool(features_4)
 
-        flattened_features = pooled_features.view(pooled_features.size(0), -1)
+        flattened_features = pooled_features.view(
+            pooled_features.size(0),
+            -1,
+        )
         class_logits = self.fully_connected_classifier(flattened_features)
         return class_logits
 
@@ -339,7 +378,9 @@ def train_one_epoch(
             )
 
     epoch_average_loss = total_loss_sum / total_samples_count
-    epoch_average_accuracy = 100.0 * correct_predictions_count / total_samples_count
+    epoch_average_accuracy = 100.0 * correct_predictions_count / (
+        total_samples_count
+    )
 
     return {
         "loss": epoch_average_loss,
@@ -379,7 +420,9 @@ def validate_model(
             total_samples_count += video_batch.size(0)
 
     val_average_loss = total_loss_sum / total_samples_count
-    val_average_accuracy = 100.0 * correct_predictions_count / total_samples_count
+    val_average_accuracy = 100.0 * correct_predictions_count / (
+        total_samples_count
+    )
 
     print(
         "Validation - "
@@ -414,6 +457,42 @@ def save_model_checkpoint(
 
     torch.save(checkpoint_data, checkpoint_path)
     print(f"Checkpoint saved: {checkpoint_path}")
+
+
+def save_training_results(
+    output_directory: str,
+    training_history: List[Dict[str, float]],
+    final_test_metrics: Dict[str, float],
+    viseme_classes: List[str],
+) -> None:
+    """Save training history and final test metrics to JSON files."""
+    os.makedirs(output_directory, exist_ok=True)
+
+    history_path = os.path.join(output_directory, "training_history.json")
+    metrics_path = os.path.join(output_directory, "final_test_metrics.json")
+
+    with open(history_path, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "viseme_classes": viseme_classes,
+                "epochs": training_history,
+            },
+            f,
+            indent=2,
+        )
+
+    with open(metrics_path, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "viseme_classes": viseme_classes,
+                "test_metrics": final_test_metrics,
+            },
+            f,
+            indent=2,
+        )
+
+    print(f"Training history saved to: {history_path}")
+    print(f"Final test metrics saved to: {metrics_path}")
 
 
 def main_training_pipeline():
@@ -500,13 +579,16 @@ def main_training_pipeline():
         weight_decay=config.weight_decay_l2,
     )
 
-    tensorboard_writer = SummaryWriter(log_dir=config.tensorboard_log_directory)
+    tensorboard_writer = SummaryWriter(
+        log_dir=config.tensorboard_log_directory,
+    )
 
     print("\n" + "-" * 80)
     print("Starting training...")
     print("-" * 80)
 
     best_validation_accuracy = 0.0
+    training_history: List[Dict[str, float]] = []
 
     for epoch in range(1, config.number_of_epochs + 1):
         print(f"\nEpoch {epoch}/{config.number_of_epochs}")
@@ -519,7 +601,9 @@ def main_training_pipeline():
             optimizer=optimizer,
             device=config.device,
             epoch_number=epoch,
-            print_every_n_batches=config.print_training_progress_every_n_batches,
+            print_every_n_batches=(
+                config.print_training_progress_every_n_batches
+            ),
         )
 
         val_metrics = validate_model(
@@ -532,8 +616,26 @@ def main_training_pipeline():
 
         tensorboard_writer.add_scalar("Loss/train", train_metrics["loss"], epoch)
         tensorboard_writer.add_scalar("Loss/val", val_metrics["loss"], epoch)
-        tensorboard_writer.add_scalar("Accuracy/train", train_metrics["accuracy"], epoch)
-        tensorboard_writer.add_scalar("Accuracy/val", val_metrics["accuracy"], epoch)
+        tensorboard_writer.add_scalar(
+            "Accuracy/train",
+            train_metrics["accuracy"],
+            epoch,
+        )
+        tensorboard_writer.add_scalar(
+            "Accuracy/val",
+            val_metrics["accuracy"],
+            epoch,
+        )
+
+        training_history.append(
+            {
+                "epoch": epoch,
+                "train_loss": float(train_metrics["loss"]),
+                "train_accuracy": float(train_metrics["accuracy"]),
+                "val_loss": float(val_metrics["loss"]),
+                "val_accuracy": float(val_metrics["accuracy"]),
+            }
+        )
 
         if epoch % config.save_checkpoint_every_n_epochs == 0:
             checkpoint_filename = f"bozkurt_viseme_epoch_{epoch}.pth"
@@ -558,7 +660,8 @@ def main_training_pipeline():
             )
             print(
                 "New best model saved! "
-                f"Validation accuracy: {best_validation_accuracy:.2f}%"
+                f"Validation accuracy: "
+                f"{best_validation_accuracy:.2f}%"
             )
 
     print("\n" + "=" * 80)
@@ -573,9 +676,22 @@ def main_training_pipeline():
         epoch_number=config.number_of_epochs,
     )
 
+    final_test_metrics = {
+        "loss": float(test_metrics["loss"]),
+        "accuracy": float(test_metrics["accuracy"]),
+        "best_validation_accuracy": float(best_validation_accuracy),
+    }
+
     print("\nFinal Test Results:")
-    print(f"  Loss: {test_metrics['loss']:.4f}")
-    print(f"  Accuracy: {test_metrics['accuracy']:.2f}%")
+    print(f"  Loss: {final_test_metrics['loss']:.4f}")
+    print(f"  Accuracy: {final_test_metrics['accuracy']:.2f}%")
+
+    save_training_results(
+        output_directory=config.metrics_output_directory,
+        training_history=training_history,
+        final_test_metrics=final_test_metrics,
+        viseme_classes=bozkurt_viseme_classes,
+    )
 
     tensorboard_writer.close()
 
