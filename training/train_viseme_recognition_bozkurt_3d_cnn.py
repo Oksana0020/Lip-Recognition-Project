@@ -9,8 +9,9 @@ Bozkurt System: 16 viseme classes (S, V2-V16)
 
 import json
 import os
+import csv
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import importlib.util
 
 import cv2
@@ -58,17 +59,50 @@ class BozkurtVisemeTrainingConfig:
     """Configuration for Bozkurt viseme recognition training."""
 
     def __init__(self):
-        self.data_root_directory = "data/processed/visemes_bozkurt"
+        self.mapping_csv_path = "mapping/bozkurt_viseme_map.csv"
+
+        preferred_data_roots = [
+            "data/processed/visemes_bozkurt_mfa_balanced_npy",
+            "data/processed/visemes_bozkurt_mfa_npy",
+            "data/processed/visemes_bozkurt_mfa",
+        ]
+        self.data_root_directory = preferred_data_roots[-1]
+
+        for candidate_root in preferred_data_roots:
+            if os.path.isdir(candidate_root):
+                self.data_root_directory = candidate_root
+                break
+
+        if self.data_root_directory.endswith("_balanced_npy"):
+            print(
+                "Using balanced precomputed viseme .npy dataset: "
+                f"{self.data_root_directory}"
+            )
+        elif self.data_root_directory.endswith("_npy"):
+            print(
+                "Using precomputed viseme .npy dataset: "
+                f"{self.data_root_directory}"
+            )
+        else:
+            print(
+                "Precomputed .npy viseme dataset not found; "
+                "falling back to JSON+video extraction dataset"
+            )
+
+        self.phoneme_intervals_root_directory = "data/processed/phonemes_mfa"
 
         self.video_height_pixels = 64
         self.video_width_pixels = 64
-        self.sequence_length_frames = 50
+        self.sequence_length_frames = 32
         self.color_channels = 1
 
         self.batch_size_samples = 32
+        self.num_data_loading_workers = 0
         self.number_of_epochs = 50
         self.learning_rate = 0.001
         self.weight_decay_l2 = 0.0001
+        self.reduce_lr_on_plateau_patience = 2
+        self.early_stopping_patience = 6
 
         self.training_data_ratio = 0.7
         self.validation_data_ratio = 0.15
@@ -98,10 +132,56 @@ class BozkurtVisemeTrainingConfig:
         if self.use_gpu_if_available and torch.cuda.is_available():
             device = torch.device("cuda")
             print(f"Using GPU: {torch.cuda.get_device_name(0)}")
-        else:
-            device = torch.device("cpu")
-            print("Using CPU for training")
+
+            return device
+
+        if self.use_gpu_if_available:
+            try:
+                if hasattr(torch, "xpu") and torch.xpu.is_available():
+                    device = torch.device("xpu")
+                    print("Using Intel XPU backend")
+                    return device
+            except Exception:
+                pass
+
+            try:
+                torch_directml = importlib.import_module(
+                    "torch_directml"
+                )
+                device = torch_directml.device()
+                if self._directml_supports_conv3d(device):
+                    print("Using DirectML GPU backend")
+                    return device
+
+                print(
+                    "DirectML is available but Conv3D is not supported "
+                    "for this model; falling back to CPU"
+                )
+            except Exception:
+                pass
+
+        device = torch.device("cpu")
+        print("Using CPU for training")
         return device
+
+    def _directml_supports_conv3d(self, device: Any) -> bool:
+        """Check whether Conv3D works on DirectML backend."""
+        try:
+            test_input = torch.zeros(
+                (1, 1, 4, 8, 8),
+                dtype=torch.float32,
+                device=device,
+            )
+            test_conv = nn.Conv3d(
+                in_channels=1,
+                out_channels=2,
+                kernel_size=(3, 3, 3),
+                padding=(1, 1, 1),
+            ).to(device)
+            _ = test_conv(test_input)
+            return True
+        except Exception:
+            return False
 
 
 class BozkurtVisemeLipReadingDataset(Dataset):
@@ -117,14 +197,19 @@ class BozkurtVisemeLipReadingDataset(Dataset):
         sequence_length_frames: int = 50,
         target_height_pixels: int = 64,
         target_width_pixels: int = 64,
+        phoneme_intervals_root_directory: Optional[str] = None,
         data_split: str = "train",
     ):
         self.data_root_directory = data_root_directory
+        self.phoneme_intervals_root_directory = (
+            phoneme_intervals_root_directory
+        )
         self.viseme_class_labels = sorted(viseme_class_labels)
         self.sequence_length_frames = sequence_length_frames
         self.target_height_pixels = target_height_pixels
         self.target_width_pixels = target_width_pixels
         self.data_split = data_split
+        self.video_path_cache: Dict[str, str] = {}
 
         self.viseme_label_to_index = {
             label: idx for idx, label in enumerate(self.viseme_class_labels)
@@ -167,12 +252,26 @@ class BozkurtVisemeLipReadingDataset(Dataset):
                     filename,
                 )
 
-                if not os.path.exists(npy_file_path):
+                metadata = self._safe_load_json(json_file_path)
+                if metadata is None:
                     continue
 
+                source_video_path: Optional[str] = None
+                if os.path.exists(npy_file_path):
+                    source_video_path = npy_file_path
+                else:
+                    source_video_path = self._resolve_source_video_path(
+                        filename,
+                        metadata,
+                    )
+                    if source_video_path is None:
+                        continue
+
                 sample_info = {
-                    "video_file_path": npy_file_path,
+                    "video_file_path": source_video_path,
                     "metadata_file_path": json_file_path,
+                    "start_time": float(metadata.get("start_time", 0.0)),
+                    "end_time": float(metadata.get("end_time", 0.0)),
                     "viseme_label": viseme_label,
                     "viseme_class_index": (
                         self.viseme_label_to_index[viseme_label]
@@ -182,17 +281,111 @@ class BozkurtVisemeLipReadingDataset(Dataset):
 
         return all_samples
 
+    def _safe_load_json(self, json_path: str) -> Optional[Dict]:
+        try:
+            with open(json_path, "r", encoding="utf-8") as json_file:
+                return json.load(json_file)
+        except Exception as error:
+            print(f"Warning: Failed to parse metadata {json_path}: {error}")
+            return None
+
+    def _resolve_source_video_path(
+        self,
+        metadata_filename: str,
+        metadata: Dict,
+    ) -> Optional[str]:
+        embedded_video = metadata.get("video")
+        if isinstance(embedded_video, str) and os.path.exists(embedded_video):
+            return embedded_video
+
+        if not self.phoneme_intervals_root_directory:
+            return None
+
+        try:
+            base_video_id = metadata_filename.rsplit("_", 2)[0]
+        except Exception:
+            return None
+
+        if base_video_id in self.video_path_cache:
+            return self.video_path_cache[base_video_id]
+
+        interval_file_path = os.path.join(
+            self.phoneme_intervals_root_directory,
+            f"{base_video_id}_phoneme_intervals_mfa.json",
+        )
+        if not os.path.exists(interval_file_path):
+            return None
+
+        interval_json = self._safe_load_json(interval_file_path)
+        if interval_json is None:
+            return None
+
+        video_path = interval_json.get("video")
+        if isinstance(video_path, str) and os.path.exists(video_path):
+            self.video_path_cache[base_video_id] = video_path
+            return video_path
+
+        return None
+
     def __len__(self) -> int:
         return len(self.video_samples_list)
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, int]:
         sample_info = self.video_samples_list[index]
-        video_frames_array = np.load(sample_info["video_file_path"])
+
+        if sample_info["video_file_path"].lower().endswith(".npy"):
+            video_frames_array = np.load(sample_info["video_file_path"])
+        else:
+            video_frames_array = self._extract_video_segment_frames(
+                video_path=sample_info["video_file_path"],
+                start_time_seconds=sample_info["start_time"],
+                end_time_seconds=sample_info["end_time"],
+            )
+
         processed_frames = self._process_video_frames(video_frames_array)
 
         video_tensor = torch.FloatTensor(processed_frames)
         label_index = sample_info["viseme_class_index"]
         return video_tensor, label_index
+
+    def _extract_video_segment_frames(
+        self,
+        video_path: str,
+        start_time_seconds: float,
+        end_time_seconds: float,
+    ) -> np.ndarray:
+        cap = cv2.VideoCapture(video_path)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
+        if fps is None or fps <= 0:
+            fps = 25.0
+
+        start_frame_idx = max(0, int(start_time_seconds * fps))
+        end_frame_idx = max(start_frame_idx, int(end_time_seconds * fps))
+
+        frames: List[np.ndarray] = []
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame_idx)
+
+        for _ in range(start_frame_idx, end_frame_idx + 1):
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frames.append(frame)
+
+        cap.release()
+
+        if not frames:
+            return np.zeros(
+                (
+                    1,
+                    self.target_height_pixels,
+                    self.target_width_pixels,
+                    3,
+                ),
+                dtype=np.uint8,
+            )
+
+        return np.array(frames)
 
     def _process_video_frames(
         self,
@@ -241,6 +434,56 @@ class BozkurtVisemeLipReadingDataset(Dataset):
 
         processed_video = np.stack(processed_frames_list, axis=0)
         return processed_video
+
+
+def load_expected_viseme_classes(mapping_csv_path: str) -> List[str]:
+    """Load expected viseme class labels from mapping CSV."""
+    if not os.path.exists(mapping_csv_path):
+        return []
+
+    expected_classes: List[str] = []
+    with open(mapping_csv_path, "r", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            viseme_label = str(row.get("viseme_class", "")).strip()
+            if viseme_label:
+                expected_classes.append(viseme_label)
+
+    return sorted(set(expected_classes))
+
+
+def compute_class_weights(
+    train_dataset,
+    number_of_classes: int,
+) -> torch.Tensor:
+    """Compute inverse-frequency class weights from a train subset."""
+    class_counts = np.zeros(number_of_classes, dtype=np.float64)
+
+    subset_indices = getattr(train_dataset, "indices", None)
+    base_dataset = getattr(train_dataset, "dataset", train_dataset)
+
+    if subset_indices is None:
+        subset_indices = list(range(len(base_dataset)))
+
+    for sample_index in subset_indices:
+        label_index = base_dataset.video_samples_list[sample_index][
+            "viseme_class_index"
+        ]
+        class_counts[label_index] += 1.0
+
+    safe_counts = np.maximum(class_counts, 1.0)
+    total_count = safe_counts.sum()
+    weights = total_count / (number_of_classes * safe_counts)
+    normalized_weights = weights / weights.mean()
+
+    return torch.tensor(normalized_weights, dtype=torch.float32)
+
+
+def load_checkpoint_into_model(model: nn.Module, checkpoint_path: str) -> None:
+    """Load model weights from a saved checkpoint path."""
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    state_dict = checkpoint.get("model_state_dict", checkpoint)
+    model.load_state_dict(state_dict)
 
 
 class ThreeDimensionalCNN(nn.Module):
@@ -335,7 +578,7 @@ def train_one_epoch(
     train_dataloader: DataLoader,
     loss_function: nn.Module,
     optimizer: optim.Optimizer,
-    device: torch.device,
+    device: Any,
     epoch_number: int,
     print_every_n_batches: int,
 ) -> Dict[str, float]:
@@ -377,6 +620,9 @@ def train_one_epoch(
                 }
             )
 
+    if total_samples_count == 0:
+        return {"loss": 0.0, "accuracy": 0.0}
+
     epoch_average_loss = total_loss_sum / total_samples_count
     epoch_average_accuracy = 100.0 * correct_predictions_count / (
         total_samples_count
@@ -392,7 +638,7 @@ def validate_model(
     model: nn.Module,
     val_dataloader: DataLoader,
     loss_function: nn.Module,
-    device: torch.device,
+    device: Any,
     epoch_number: int,
 ) -> Dict[str, float]:
     """Validate model and return average loss and accuracy."""
@@ -413,11 +659,16 @@ def validate_model(
             loss = loss_function(prediction_logits, label_batch)
 
             predicted_classes = torch.argmax(prediction_logits, dim=1)
-            correct_predictions = (predicted_classes == label_batch).sum().item()
+            correct_predictions = (
+                predicted_classes == label_batch
+            ).sum().item()
 
             total_loss_sum += loss.item() * video_batch.size(0)
             correct_predictions_count += correct_predictions
             total_samples_count += video_batch.size(0)
+
+    if total_samples_count == 0:
+        return {"loss": 0.0, "accuracy": 0.0}
 
     val_average_loss = total_loss_sum / total_samples_count
     val_average_accuracy = 100.0 * correct_predictions_count / (
@@ -443,6 +694,7 @@ def save_model_checkpoint(
     val_accuracy: float,
     save_directory: str,
     checkpoint_filename: str,
+    viseme_classes: List[str],
 ) -> None:
     """Save model checkpoint to disk."""
     os.makedirs(save_directory, exist_ok=True)
@@ -453,6 +705,7 @@ def save_model_checkpoint(
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "val_accuracy": val_accuracy,
+        "viseme_classes": viseme_classes,
     }
 
     torch.save(checkpoint_data, checkpoint_path)
@@ -506,11 +759,34 @@ def main_training_pipeline():
     torch.manual_seed(config.random_seed)
     np.random.seed(config.random_seed)
 
-    bozkurt_viseme_classes = [
-        "S",
-        "V2", "V3", "V4", "V5", "V6", "V7", "V8",
-        "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16",
-    ]
+    bozkurt_viseme_classes = sorted(
+        [
+            folder_name
+            for folder_name in os.listdir(config.data_root_directory)
+            if os.path.isdir(
+                os.path.join(config.data_root_directory, folder_name)
+            )
+        ]
+    )
+
+    if len(bozkurt_viseme_classes) == 0:
+        raise RuntimeError(
+            "No viseme class folders found in "
+            f"{config.data_root_directory}"
+        )
+
+    expected_viseme_classes = load_expected_viseme_classes(
+        config.mapping_csv_path
+    )
+    missing_viseme_classes = sorted(
+        set(expected_viseme_classes) - set(bozkurt_viseme_classes)
+    )
+
+    if missing_viseme_classes:
+        print(
+            "Warning: Expected viseme classes missing from dataset: "
+            f"{missing_viseme_classes}"
+        )
 
     config.number_of_classes = len(bozkurt_viseme_classes)
 
@@ -527,9 +803,23 @@ def main_training_pipeline():
         sequence_length_frames=config.sequence_length_frames,
         target_height_pixels=config.video_height_pixels,
         target_width_pixels=config.video_width_pixels,
+        phoneme_intervals_root_directory=(
+            config.phoneme_intervals_root_directory
+        ),
     )
 
-    train_dataset, val_dataset, test_dataset = split_dataset_into_train_val_test(
+    if len(full_dataset) == 0:
+        raise RuntimeError(
+            "No valid training samples found. "
+            "Expected either .npy files in viseme folders or "
+            "resolvable source videos via phoneme interval JSON files."
+        )
+
+    (
+        train_dataset,
+        val_dataset,
+        test_dataset,
+    ) = split_dataset_into_train_val_test(
         full_dataset=full_dataset,
         train_ratio=config.training_data_ratio,
         val_ratio=config.validation_data_ratio,
@@ -537,23 +827,38 @@ def main_training_pipeline():
         random_seed=config.random_seed,
     )
 
+    default_workers = max(0, int(config.num_data_loading_workers))
+    use_pin_memory = isinstance(config.device, torch.device) and (
+        config.device.type == "cuda"
+    )
+
+    common_loader_kwargs = {
+        "batch_size": config.batch_size_samples,
+        "num_workers": default_workers,
+        "pin_memory": use_pin_memory,
+    }
+    if default_workers > 0:
+        common_loader_kwargs["persistent_workers"] = True
+
     train_dataloader = DataLoader(
         train_dataset,
-        batch_size=config.batch_size_samples,
         shuffle=True,
-        num_workers=0,
+        **common_loader_kwargs,
     )
     val_dataloader = DataLoader(
         val_dataset,
-        batch_size=config.batch_size_samples,
         shuffle=False,
-        num_workers=0,
+        **common_loader_kwargs,
     )
     test_dataloader = DataLoader(
         test_dataset,
-        batch_size=config.batch_size_samples,
         shuffle=False,
-        num_workers=0,
+        **common_loader_kwargs,
+    )
+
+    print(
+        "DataLoader workers: "
+        f"{default_workers}, pin_memory={use_pin_memory}"
     )
 
     print("\n" + "-" * 80)
@@ -572,11 +877,23 @@ def main_training_pipeline():
     print(f"Total parameters: {total_parameters:,}")
     print(f"Trainable parameters: {trainable_parameters:,}")
 
-    loss_function = nn.CrossEntropyLoss()
+    class_weights = compute_class_weights(
+        train_dataset=train_dataset,
+        number_of_classes=config.number_of_classes,
+    ).to(config.device)
+    print(f"Class weights: {class_weights.cpu().numpy().round(3).tolist()}")
+
+    loss_function = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(
         model.parameters(),
         lr=config.learning_rate,
         weight_decay=config.weight_decay_l2,
+    )
+    lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode="max",
+        factor=0.5,
+        patience=config.reduce_lr_on_plateau_patience,
     )
 
     tensorboard_writer = SummaryWriter(
@@ -588,6 +905,11 @@ def main_training_pipeline():
     print("-" * 80)
 
     best_validation_accuracy = 0.0
+    best_checkpoint_path = os.path.join(
+        config.checkpoint_save_directory,
+        "bozkurt_viseme_best_model.pth",
+    )
+    epochs_without_improvement = 0
     training_history: List[Dict[str, float]] = []
 
     for epoch in range(1, config.number_of_epochs + 1):
@@ -614,7 +936,11 @@ def main_training_pipeline():
             epoch_number=epoch,
         )
 
-        tensorboard_writer.add_scalar("Loss/train", train_metrics["loss"], epoch)
+        tensorboard_writer.add_scalar(
+            "Loss/train",
+            train_metrics["loss"],
+            epoch,
+        )
         tensorboard_writer.add_scalar("Loss/val", val_metrics["loss"], epoch)
         tensorboard_writer.add_scalar(
             "Accuracy/train",
@@ -624,6 +950,11 @@ def main_training_pipeline():
         tensorboard_writer.add_scalar(
             "Accuracy/val",
             val_metrics["accuracy"],
+            epoch,
+        )
+        tensorboard_writer.add_scalar(
+            "LearningRate",
+            optimizer.param_groups[0]["lr"],
             epoch,
         )
 
@@ -646,10 +977,12 @@ def main_training_pipeline():
                 val_accuracy=val_metrics["accuracy"],
                 save_directory=config.checkpoint_save_directory,
                 checkpoint_filename=checkpoint_filename,
+                viseme_classes=bozkurt_viseme_classes,
             )
 
         if val_metrics["accuracy"] > best_validation_accuracy:
             best_validation_accuracy = val_metrics["accuracy"]
+            epochs_without_improvement = 0
             save_model_checkpoint(
                 model=model,
                 optimizer=optimizer,
@@ -657,16 +990,33 @@ def main_training_pipeline():
                 val_accuracy=val_metrics["accuracy"],
                 save_directory=config.checkpoint_save_directory,
                 checkpoint_filename="bozkurt_viseme_best_model.pth",
+                viseme_classes=bozkurt_viseme_classes,
             )
             print(
                 "New best model saved! "
                 f"Validation accuracy: "
                 f"{best_validation_accuracy:.2f}%"
             )
+        else:
+            epochs_without_improvement += 1
+
+        lr_scheduler.step(val_metrics["accuracy"])
+
+        if epochs_without_improvement >= config.early_stopping_patience:
+            print(
+                "Early stopping triggered after "
+                f"{epochs_without_improvement} epochs without improvement"
+            )
+            break
 
     print("\n" + "=" * 80)
     print("Evaluating on test set...")
     print("=" * 80)
+
+    if os.path.exists(best_checkpoint_path):
+        load_checkpoint_into_model(model, best_checkpoint_path)
+        model = model.to(config.device)
+        print("Loaded best checkpoint for final test evaluation")
 
     test_metrics = validate_model(
         model=model,
