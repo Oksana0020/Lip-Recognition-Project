@@ -7,6 +7,7 @@ into paired .json + .npy samples.
 from __future__ import annotations
 import argparse
 import json
+import random
 import shutil
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -99,12 +100,25 @@ def _extract_segment_frames(
     return np.array(frames)
 
 
-def _collect_json_files(input_root: Path) -> list[Path]:
+def _collect_json_files(
+    input_root: Path,
+    max_per_class: Optional[int],
+    random_seed: int,
+) -> list[Path]:
     json_files = []
+    random_generator = random.Random(random_seed)
+
     for viseme_dir in sorted(input_root.iterdir()):
         if not viseme_dir.is_dir():
             continue
-        json_files.extend(sorted(viseme_dir.glob("*.json")))
+
+        class_json_files = sorted(viseme_dir.glob("*.json"))
+        if max_per_class is not None and len(class_json_files) > max_per_class:
+            random_generator.shuffle(class_json_files)
+            class_json_files = sorted(class_json_files[:max_per_class])
+
+        json_files.extend(class_json_files)
+
     return json_files
 
 
@@ -114,8 +128,14 @@ def precompute_dataset(
     output_root: Path,
     overwrite: bool,
     max_samples: Optional[int],
+    max_per_class: Optional[int],
+    random_seed: int,
 ) -> Tuple[int, int, int, int]:
-    json_files = _collect_json_files(input_root)
+    json_files = _collect_json_files(
+        input_root=input_root,
+        max_per_class=max_per_class,
+        random_seed=random_seed,
+    )
     if max_samples is not None:
         json_files = json_files[:max_samples]
 
@@ -216,6 +236,18 @@ def main() -> None:
         default=None,
         help="Optional limit for quick test runs",
     )
+    parser.add_argument(
+        "--max-per-class",
+        type=int,
+        default=None,
+        help="Optional per-class cap to create a balanced smaller dataset",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed used when sampling per class",
+    )
 
     args = parser.parse_args()
 
@@ -225,6 +257,8 @@ def main() -> None:
     print(f"Input root:    {args.input_root}")
     print(f"Interval root: {args.interval_root}")
     print(f"Output root:   {args.output_root}")
+    if args.max_per_class is not None:
+        print(f"Max per class: {args.max_per_class}")
 
     if not args.input_root.exists():
         raise FileNotFoundError(f"Input root not found: {args.input_root}")
@@ -244,6 +278,8 @@ def main() -> None:
         output_root=args.output_root,
         overwrite=args.overwrite,
         max_samples=args.max_samples,
+        max_per_class=args.max_per_class,
+        random_seed=args.seed,
     )
 
     print("\nDone")
