@@ -10,6 +10,8 @@ Bozkurt System: 16 viseme classes (S, V2-V16)
 import json
 import os
 import csv
+import argparse
+import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import importlib.util
@@ -748,13 +750,29 @@ def save_training_results(
     print(f"Final test metrics saved to: {metrics_path}")
 
 
-def main_training_pipeline():
+def main_training_pipeline(
+    resume_checkpoint: Optional[str] = None,
+    fresh_start: bool = False,
+):
     """Run the complete training pipeline for Bozkurt viseme recognition."""
     print("=" * 80)
     print("BOZKURT VISEME RECOGNITION - 3D CNN TRAINING")
     print("=" * 80)
 
     config = BozkurtVisemeTrainingConfig()
+
+    if fresh_start:
+        for path_to_reset in (
+            config.checkpoint_save_directory,
+            config.metrics_output_directory,
+            config.tensorboard_log_directory,
+        ):
+            if os.path.isdir(path_to_reset):
+                shutil.rmtree(path_to_reset)
+                print(f"Reset previous run artifacts: {path_to_reset}")
+
+    os.makedirs(config.checkpoint_save_directory, exist_ok=True)
+    os.makedirs(config.metrics_output_directory, exist_ok=True)
 
     torch.manual_seed(config.random_seed)
     np.random.seed(config.random_seed)
@@ -909,10 +927,50 @@ def main_training_pipeline():
         config.checkpoint_save_directory,
         "bozkurt_viseme_best_model.pth",
     )
+    start_epoch = 1
     epochs_without_improvement = 0
     training_history: List[Dict[str, float]] = []
 
-    for epoch in range(1, config.number_of_epochs + 1):
+    if resume_checkpoint:
+        if not os.path.exists(resume_checkpoint):
+            raise FileNotFoundError(
+                f"Resume checkpoint not found: {resume_checkpoint}"
+            )
+
+        checkpoint = torch.load(resume_checkpoint, map_location="cpu")
+        checkpoint_state_dict = checkpoint.get("model_state_dict", checkpoint)
+        model.load_state_dict(checkpoint_state_dict)
+
+        optimizer_state = checkpoint.get("optimizer_state_dict")
+        if optimizer_state is not None:
+            optimizer.load_state_dict(optimizer_state)
+
+        checkpoint_epoch = int(checkpoint.get("epoch", 0))
+        start_epoch = checkpoint_epoch + 1
+        best_validation_accuracy = float(
+            checkpoint.get("val_accuracy", 0.0)
+        )
+
+        checkpoint_viseme_classes = checkpoint.get("viseme_classes")
+        if isinstance(checkpoint_viseme_classes, list):
+            if checkpoint_viseme_classes != bozkurt_viseme_classes:
+                print(
+                    "Warning checkpoint viseme class order does not "
+                    "match current dataset order"
+                )
+
+        print(
+            "Resumed training from checkpoint "
+            f"{resume_checkpoint} at epoch {checkpoint_epoch}"
+        )
+
+    if start_epoch > config.number_of_epochs:
+        print(
+            "Checkpoint already reached/exceeded target epochs; "
+            "skipping training loop"
+        )
+
+    for epoch in range(start_epoch, config.number_of_epochs + 1):
         print(f"\nEpoch {epoch}/{config.number_of_epochs}")
         print("-" * 40)
 
@@ -1053,4 +1111,49 @@ def main_training_pipeline():
 
 
 if __name__ == "__main__":
-    main_training_pipeline()
+    argument_parser = argparse.ArgumentParser(
+        description="Train Bozkurt viseme recognition model"
+    )
+    argument_parser.add_argument(
+        "--resume-checkpoint",
+        type=str,
+        default=None,
+        help="Path to checkpoint file for resuming training",
+    )
+    argument_parser.add_argument(
+        "--resume-best",
+        action="store_true",
+        help=(
+            "Resume from training/checkpoints_bozkurt_viseme/"
+            "bozkurt_viseme_best_model.pth"
+        ),
+    )
+    argument_parser.add_argument(
+        "--fresh-start",
+        action="store_true",
+        help=(
+            "Delete prior checkpoints/results/tensorboard logs "
+            "and start from epoch 1"
+        ),
+    )
+
+    cli_args = argument_parser.parse_args()
+
+    selected_resume_checkpoint = cli_args.resume_checkpoint
+    if cli_args.resume_best:
+        selected_resume_checkpoint = (
+            "training/checkpoints_bozkurt_viseme/"
+            "bozkurt_viseme_best_model.pth"
+        )
+
+    if cli_args.fresh_start and selected_resume_checkpoint:
+        print(
+            "Fresh start requested; ignoring resume checkpoint "
+            f"{selected_resume_checkpoint}"
+        )
+        selected_resume_checkpoint = None
+
+    main_training_pipeline(
+        resume_checkpoint=selected_resume_checkpoint,
+        fresh_start=cli_args.fresh_start,
+    )
