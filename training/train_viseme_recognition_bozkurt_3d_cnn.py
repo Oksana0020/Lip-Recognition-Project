@@ -93,18 +93,18 @@ class BozkurtVisemeTrainingConfig:
 
         self.phoneme_intervals_root_directory = "data/processed/phonemes_mfa"
 
-        self.video_height_pixels = 64
-        self.video_width_pixels = 64
-        self.sequence_length_frames = 32
+        self.video_height_pixels = 48
+        self.video_width_pixels = 48
+        self.sequence_length_frames = 16
         self.color_channels = 1
 
-        self.batch_size_samples = 32
+        self.batch_size_samples = 8
         self.num_data_loading_workers = 0
-        self.number_of_epochs = 50
+        self.number_of_epochs = 30
         self.learning_rate = 0.001
         self.weight_decay_l2 = 0.0001
-        self.reduce_lr_on_plateau_patience = 2
-        self.early_stopping_patience = 6
+        self.reduce_lr_on_plateau_patience = 3
+        self.early_stopping_patience = 8
 
         self.training_data_ratio = 0.7
         self.validation_data_ratio = 0.15
@@ -335,18 +335,45 @@ class BozkurtVisemeLipReadingDataset(Dataset):
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, int]:
         sample_info = self.video_samples_list[index]
 
-        if sample_info["video_file_path"].lower().endswith(".npy"):
-            video_frames_array = np.load(sample_info["video_file_path"])
-        else:
-            video_frames_array = self._extract_video_segment_frames(
-                video_path=sample_info["video_file_path"],
-                start_time_seconds=sample_info["start_time"],
-                end_time_seconds=sample_info["end_time"],
-            )
+        try:
+            if sample_info["video_file_path"].lower().endswith(".npy"):
+                video_frames_array = np.load(
+                    sample_info["video_file_path"],
+                    allow_pickle=False
+                )
+                if video_frames_array.size == 0:
+                    raise ValueError(
+                        f"Empty npy file: {sample_info['video_file_path']}"
+                    )
+            else:
+                video_frames_array = self._extract_video_segment_frames(
+                    video_path=sample_info["video_file_path"],
+                    start_time_seconds=sample_info["start_time"],
+                    end_time_seconds=sample_info["end_time"],
+                )
+        except (ValueError, OSError, FileNotFoundError):
+            return self._get_fallback_sample(sample_info)
 
         processed_frames = self._process_video_frames(video_frames_array)
 
         video_tensor = torch.FloatTensor(processed_frames)
+        label_index = sample_info["viseme_class_index"]
+        return video_tensor, label_index
+
+    def _get_fallback_sample(
+        self, sample_info: Dict
+    ) -> Tuple[torch.Tensor, int]:
+        """Return a zero-padded fallback for corrupted files."""
+        fallback_frames = np.zeros(
+            (
+                self.sequence_length_frames,
+                self.target_height_pixels,
+                self.target_width_pixels,
+                1,
+            ),
+            dtype=np.float32
+        )
+        video_tensor = torch.FloatTensor(fallback_frames)
         label_index = sample_info["viseme_class_index"]
         return video_tensor, label_index
 
