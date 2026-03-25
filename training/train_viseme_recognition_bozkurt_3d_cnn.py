@@ -20,38 +20,24 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 
-def _load_split_dataset_utils():
-    """Lazy-load dataset splitting utilities from preprocessing module."""
-    preprocessing_dir = Path(__file__).parent.parent / "preprocessing"
+def split_dataset_into_train_val_test(
+    full_dataset, train_ratio, val_ratio, test_ratio, random_seed
+):
+    """Split dataset; loads split utils from the preprocessing module."""
     spec = importlib.util.spec_from_file_location(
         "dataset_splitting_utils",
-        preprocessing_dir / "dataset_splitting_utils.py",
+        Path(__file__).parent.parent
+        / "preprocessing"
+        / "dataset_splitting_utils.py",
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module
-
-
-_split_utils = None
-
-
-def split_dataset_into_train_val_test(
-    full_dataset,
-    train_ratio,
-    val_ratio,
-    test_ratio,
-    random_seed,
-):
-    """Wrapper to call split utility function."""
-    global _split_utils
-    if _split_utils is None:
-        _split_utils = _load_split_dataset_utils()
-    return _split_utils.split_dataset_into_train_val_test(
+    return module.split_dataset_into_train_val_test(
         full_dataset, train_ratio, val_ratio, test_ratio, random_seed
     )
 
@@ -60,36 +46,9 @@ class BozkurtVisemeTrainingConfig:
     """Configuration for Bozkurt viseme recognition training."""
     def __init__(self):
         self.mapping_csv_path = "mapping/bozkurt_viseme_map.csv"
-
-        preferred_data_roots = [
-            "data/processed/visemes_bozkurt_mfa_balanced_npy",
-            "data/processed/visemes_bozkurt_mfa_npy",
-            "data/processed/visemes_bozkurt_mfa",
-        ]
-        self.data_root_directory = preferred_data_roots[-1]
-
-        for candidate_root in preferred_data_roots:
-            if os.path.isdir(candidate_root):
-                self.data_root_directory = candidate_root
-                break
-
-        if self.data_root_directory.endswith("_balanced_npy"):
-            print(
-                "Using balanced precomputed viseme .npy dataset: "
-                f"{self.data_root_directory}"
-            )
-        elif self.data_root_directory.endswith("_npy"):
-            print(
-                "Using precomputed viseme .npy dataset: "
-                f"{self.data_root_directory}"
-            )
-        else:
-            print(
-                "Precomputed .npy viseme dataset not found; "
-                "falling back to JSON+video extraction dataset"
-            )
-
-        self.phoneme_intervals_root_directory = "data/processed/phonemes_mfa"
+        self.data_root_directory = (
+            "data/processed/visemes_bozkurt_mfa_balanced_npy"
+        )
         self.video_height_pixels = 64
         self.video_width_pixels = 64
         self.sequence_length_frames = 8
@@ -108,71 +67,36 @@ class BozkurtVisemeTrainingConfig:
             "training/checkpoints_bozkurt_viseme"
         )
         self.save_checkpoint_every_n_epochs = 10
-        self.keep_best_model_only = True
         self.tensorboard_log_directory = "training/runs_bozkurt_viseme"
         self.print_training_progress_every_n_batches = 10
         self.metrics_output_directory = "training/results_bozkurt_viseme"
-        self.training_history_filename = "training_history.json"
-        self.final_metrics_filename = "final_test_metrics.json"
-        self.use_gpu_if_available = True
         self.device = self._setup_device()
         self.random_seed = 42
         self.number_of_classes = 16
 
     def _setup_device(self) -> torch.device:
         """Configure GPU or CPU device for training."""
-        if self.use_gpu_if_available and torch.cuda.is_available():
-            device = torch.device("cuda")
+        if torch.cuda.is_available():
             print(f"Using GPU: {torch.cuda.get_device_name(0)}")
-            return device
-
-        if self.use_gpu_if_available:
-            try:
-                if hasattr(torch, "xpu") and torch.xpu.is_available():
-                    device = torch.device("xpu")
-                    print("Using Intel XPU backend")
-                    return device
-            except Exception:
-                pass
-
-            try:
-                torch_directml = importlib.import_module(
-                    "torch_directml"
-                )
-                device = torch_directml.device()
-                if self._directml_supports_conv3d(device):
-                    print("Using DirectML GPU backend")
-                    return device
-
-                print(
-                    "DirectML is available but Conv3D is not supported "
-                    "for this model; falling back to CPU"
-                )
-            except Exception:
-                pass
-
-        device = torch.device("cpu")
-        print("Using CPU for training")
-        return device
-
-    def _directml_supports_conv3d(self, device: Any) -> bool:
-        """Check whether Conv3D works on DirectML backend."""
+            return torch.device("cuda")
         try:
-            test_input = torch.zeros(
-                (1, 1, 4, 8, 8),
-                dtype=torch.float32,
-                device=device,
-            )
-            test_conv = nn.Conv3d(
-                in_channels=1,
-                out_channels=2,
-                kernel_size=(3, 3, 3),
-                padding=(1, 1, 1),
-            ).to(device)
-            _ = test_conv(test_input)
-            return True
+            if hasattr(torch, "xpu") and torch.xpu.is_available():
+                print("Using Intel XPU backend")
+                return torch.device("xpu")
         except Exception:
-            return False
+            pass
+        try:
+            torch_directml = importlib.import_module("torch_directml")
+            dml_dev = torch_directml.device()
+            # Test Conv3D support before committing to DirectML
+            _t = torch.zeros((1, 1, 4, 8, 8), device=dml_dev)
+            nn.Conv3d(1, 2, (3, 3, 3), padding=(1, 1, 1)).to(dml_dev)(_t)
+            print("Using DirectML GPU backend")
+            return dml_dev
+        except Exception:
+            pass
+        print("Using CPU for training")
+        return torch.device("cpu")
 
 
 class BozkurtVisemeLipReadingDataset(Dataset):
@@ -185,249 +109,80 @@ class BozkurtVisemeLipReadingDataset(Dataset):
         self,
         data_root_directory: str,
         viseme_class_labels: List[str],
-        sequence_length_frames: int = 50,
+        sequence_length_frames: int = 8,
         target_height_pixels: int = 64,
         target_width_pixels: int = 64,
-        phoneme_intervals_root_directory: Optional[str] = None,
         data_split: str = "train",
     ):
         self.data_root_directory = data_root_directory
-        self.phoneme_intervals_root_directory = (
-            phoneme_intervals_root_directory
-        )
         self.viseme_class_labels = sorted(viseme_class_labels)
         self.sequence_length_frames = sequence_length_frames
         self.target_height_pixels = target_height_pixels
         self.target_width_pixels = target_width_pixels
         self.data_split = data_split
-        self.video_path_cache: Dict[str, str] = {}
         self.viseme_label_to_index = {
             label: idx for idx, label in enumerate(self.viseme_class_labels)
         }
-
         self.video_samples_list = self._load_all_samples()
         print(
             f"Loaded {len(self.video_samples_list)} samples "
-            f"for {data_split} split"
+            f"({data_split})"
         )
 
     def _load_all_samples(self) -> List[Dict]:
-        """Scan directory and load all video sample paths with labels."""
+        """Index all .npy clip files in the dataset directory."""
         all_samples: List[Dict] = []
-
         for viseme_label in self.viseme_class_labels:
-            viseme_folder_path = os.path.join(
-                self.data_root_directory,
-                viseme_label,
+            folder = os.path.join(
+                self.data_root_directory, viseme_label
             )
-
-            if not os.path.exists(viseme_folder_path):
-                print(
-                    f"Warning: Folder not found for viseme "
-                    f"'{viseme_label}'"
-                )
+            if not os.path.exists(folder):
+                print(f"Warning: folder missing for '{viseme_label}'")
                 continue
-
-            folder_filenames = os.listdir(viseme_folder_path)
-
-            npy_filenames = sorted(
-                [
-                    filename
-                    for filename in folder_filenames
-                    if filename.endswith(".npy")
-                ]
-            )
-
-            if npy_filenames:
-                for npy_filename in npy_filenames:
-                    npy_file_path = os.path.join(
-                        viseme_folder_path,
-                        npy_filename,
-                    )
-                    metadata_file_path = os.path.join(
-                        viseme_folder_path,
-                        npy_filename.replace(".npy", ".json"),
-                    )
-
-                    sample_info = {
-                        "video_file_path": npy_file_path,
-                        "metadata_file_path": metadata_file_path,
-                        "start_time": 0.0,
-                        "end_time": 0.0,
+            for filename in sorted(os.listdir(folder)):
+                if filename.endswith(".npy"):
+                    all_samples.append({
+                        "video_file_path": os.path.join(
+                            folder, filename
+                        ),
                         "viseme_label": viseme_label,
                         "viseme_class_index": (
                             self.viseme_label_to_index[viseme_label]
                         ),
-                    }
-                    all_samples.append(sample_info)
-                continue
-
-            for filename in sorted(folder_filenames):
-                if not filename.endswith(".json"):
-                    continue
-
-                json_file_path = os.path.join(
-                    viseme_folder_path,
-                    filename,
-                )
-
-                metadata = self._safe_load_json(json_file_path)
-                if metadata is None:
-                    continue
-
-                source_video_path = self._resolve_source_video_path(
-                    filename,
-                    metadata,
-                )
-                if source_video_path is None:
-                    continue
-
-                sample_info = {
-                    "video_file_path": source_video_path,
-                    "metadata_file_path": json_file_path,
-                    "start_time": float(metadata.get("start_time", 0.0)),
-                    "end_time": float(metadata.get("end_time", 0.0)),
-                    "viseme_label": viseme_label,
-                    "viseme_class_index": (
-                        self.viseme_label_to_index[viseme_label]
-                    ),
-                }
-                all_samples.append(sample_info)
-
+                    })
         return all_samples
-
-    def _safe_load_json(self, json_path: str) -> Optional[Dict]:
-        try:
-            with open(json_path, "r", encoding="utf-8") as json_file:
-                return json.load(json_file)
-        except Exception as error:
-            print(f"Warning: Failed to parse metadata {json_path}: {error}")
-            return None
-
-    def _resolve_source_video_path(
-        self,
-        metadata_filename: str,
-        metadata: Dict,
-    ) -> Optional[str]:
-        embedded_video = metadata.get("video")
-        if isinstance(embedded_video, str) and os.path.exists(embedded_video):
-            return embedded_video
-
-        if not self.phoneme_intervals_root_directory:
-            return None
-
-        try:
-            base_video_id = metadata_filename.rsplit("_", 2)[0]
-        except Exception:
-            return None
-
-        if base_video_id in self.video_path_cache:
-            return self.video_path_cache[base_video_id]
-
-        interval_file_path = os.path.join(
-            self.phoneme_intervals_root_directory,
-            f"{base_video_id}_phoneme_intervals_mfa.json",
-        )
-        if not os.path.exists(interval_file_path):
-            return None
-
-        interval_json = self._safe_load_json(interval_file_path)
-        if interval_json is None:
-            return None
-
-        video_path = interval_json.get("video")
-        if isinstance(video_path, str) and os.path.exists(video_path):
-            self.video_path_cache[base_video_id] = video_path
-            return video_path
-
-        return None
 
     def __len__(self) -> int:
         return len(self.video_samples_list)
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, int]:
         sample_info = self.video_samples_list[index]
-
         try:
-            if sample_info["video_file_path"].lower().endswith(".npy"):
-                video_frames_array = np.load(
-                    sample_info["video_file_path"],
-                    allow_pickle=False
-                )
-                if video_frames_array.size == 0:
-                    raise ValueError(
-                        f"Empty npy file: {sample_info['video_file_path']}"
-                    )
-            else:
-                video_frames_array = self._extract_video_segment_frames(
-                    video_path=sample_info["video_file_path"],
-                    start_time_seconds=sample_info["start_time"],
-                    end_time_seconds=sample_info["end_time"],
-                )
+            frames = np.load(
+                sample_info["video_file_path"], allow_pickle=False
+            )
+            if frames.size == 0:
+                raise ValueError("empty npy")
         except (ValueError, OSError, FileNotFoundError):
             return self._get_fallback_sample(sample_info)
-
-        processed_frames = self._process_video_frames(video_frames_array)
-
-        video_tensor = torch.FloatTensor(processed_frames)
-        label_index = sample_info["viseme_class_index"]
-        return video_tensor, label_index
+        return (
+            torch.FloatTensor(self._process_video_frames(frames)),
+            sample_info["viseme_class_index"],
+        )
 
     def _get_fallback_sample(
         self, sample_info: Dict
     ) -> Tuple[torch.Tensor, int]:
-        """Return a zero-padded fallback for corrupted files."""
-        fallback_frames = np.zeros(
-            (
+        """Return zeros for corrupted/missing files."""
+        return (
+            torch.zeros(
                 self.sequence_length_frames,
+                1,
                 self.target_height_pixels,
                 self.target_width_pixels,
-                1,
             ),
-            dtype=np.float32
+            sample_info["viseme_class_index"],
         )
-        video_tensor = torch.FloatTensor(fallback_frames)
-        label_index = sample_info["viseme_class_index"]
-        return video_tensor, label_index
-
-    def _extract_video_segment_frames(
-        self,
-        video_path: str,
-        start_time_seconds: float,
-        end_time_seconds: float,
-    ) -> np.ndarray:
-        cap = cv2.VideoCapture(video_path)
-        fps = cap.get(cv2.CAP_PROP_FPS)
-
-        if fps is None or fps <= 0:
-            fps = 25.0
-
-        start_frame_idx = max(0, int(start_time_seconds * fps))
-        end_frame_idx = max(start_frame_idx, int(end_time_seconds * fps))
-
-        frames: List[np.ndarray] = []
-        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame_idx)
-
-        for _ in range(start_frame_idx, end_frame_idx + 1):
-            ret, frame = cap.read()
-            if not ret:
-                break
-            frames.append(frame)
-
-        cap.release()
-
-        if not frames:
-            return np.zeros(
-                (
-                    1,
-                    self.target_height_pixels,
-                    self.target_width_pixels,
-                    3,
-                ),
-                dtype=np.uint8,
-            )
-
-        return np.array(frames)
 
     def _process_video_frames(
         self,
@@ -518,7 +273,6 @@ def compute_class_weights(
     Use sqrt(inverse-frequency) weights capped at 4x max/min ratio.
     """
     class_counts = np.zeros(number_of_classes, dtype=np.float64)
-
     subset_indices = getattr(train_dataset, "indices", None)
     base_dataset = getattr(train_dataset, "dataset", train_dataset)
 
@@ -538,50 +292,47 @@ def compute_class_weights(
     min_w = sqrt_weights.min()
     sqrt_weights = np.clip(sqrt_weights, min_w, min_w * 4.0)
     normalized_weights = sqrt_weights / sqrt_weights.mean()
-
     return torch.tensor(normalized_weights, dtype=torch.float32)
 
 
-class FocalLoss(nn.Module):
+def build_weighted_sampler(
+    train_dataset,
+    number_of_classes: int,
+) -> WeightedRandomSampler:
     """
-    Focal loss for multiclass classification with severe class imbalance.
-    Computes modulating factor based on predicted probabilities to focus
-    training on hard examples.
+    Build a WeightedRandomSampler so every batch has roughly
+    equal class representation regardless of raw class counts.
     """
+    class_counts = np.zeros(number_of_classes, dtype=np.float64)
+    subset_indices = getattr(train_dataset, "indices", None)
+    base_dataset = getattr(train_dataset, "dataset", train_dataset)
 
-    def __init__(
-        self,
-        weight: Optional[torch.Tensor] = None,
-        gamma: float = 2.0,
-        reduction: str = "mean",
-    ):
-        super(FocalLoss, self).__init__()
-        self.weight = weight
-        self.gamma = gamma
-        self.reduction = reduction
+    if subset_indices is None:
+        subset_indices = list(range(len(base_dataset)))
 
-    def forward(
-        self,
-        predictions: torch.Tensor,
-        targets: torch.Tensor,
-    ) -> torch.Tensor:
+    for sample_index in subset_indices:
+        label_index = base_dataset.video_samples_list[sample_index][
+            "viseme_class_index"
+        ]
+        class_counts[label_index] += 1.0
 
-        probs = torch.softmax(predictions, dim=1)
-        p_t = probs.gather(dim=1, index=targets.unsqueeze(1)).squeeze(1)
-        p_t = p_t.clamp(min=1e-8)
-        focal_modulator = (1.0 - p_t) ** self.gamma
+    safe_counts = np.maximum(class_counts, 1.0)
+    class_weights = 1.0 / safe_counts
+    sample_weights = np.array(
+        [
+            class_weights[
+                base_dataset.video_samples_list[i]["viseme_class_index"]
+            ]
+            for i in subset_indices
+        ],
+        dtype=np.float64,
+    )
 
-        cross_entropy = torch.nn.functional.cross_entropy(
-            predictions,
-            targets,
-            weight=self.weight,
-            reduction="none",
-        )
-
-        focal_loss = focal_modulator * cross_entropy
-        if self.reduction == "mean":
-            return focal_loss.mean()
-        return focal_loss.sum()
+    return WeightedRandomSampler(
+        weights=torch.from_numpy(sample_weights).float(),
+        num_samples=len(subset_indices),
+        replacement=True,
+    )
 
 
 def load_checkpoint_into_model(model: nn.Module, checkpoint_path: str) -> None:
@@ -693,7 +444,6 @@ def train_one_epoch(
     total_loss_sum = 0.0
     correct_predictions_count = 0
     total_samples_count = 0
-
     progress_bar = tqdm(train_dataloader, desc=f"Epoch {epoch_number} [Train]")
 
     for batch_index, (video_batch, label_batch) in enumerate(progress_bar):
@@ -708,7 +458,6 @@ def train_one_epoch(
 
         predicted_classes = torch.argmax(prediction_logits, dim=1)
         correct_predictions = (predicted_classes == label_batch).sum().item()
-
         total_loss_sum += loss.item() * video_batch.size(0)
         correct_predictions_count += correct_predictions
         total_samples_count += video_batch.size(0)
@@ -752,22 +501,17 @@ def validate_model(
     total_loss_sum = 0.0
     correct_predictions_count = 0
     total_samples_count = 0
-
     progress_bar = tqdm(val_dataloader, desc=f"Epoch {epoch_number} [Val]")
-
     with torch.no_grad():
         for video_batch, label_batch in progress_bar:
             video_batch = video_batch.to(device)
             label_batch = label_batch.to(device)
-
             prediction_logits = model(video_batch)
             loss = loss_function(prediction_logits, label_batch)
-
             predicted_classes = torch.argmax(prediction_logits, dim=1)
             correct_predictions = (
                 predicted_classes == label_batch
             ).sum().item()
-
             total_loss_sum += loss.item() * video_batch.size(0)
             correct_predictions_count += correct_predictions
             total_samples_count += video_batch.size(0)
@@ -804,7 +548,6 @@ def save_model_checkpoint(
     """Save model checkpoint to disk."""
     os.makedirs(save_directory, exist_ok=True)
     checkpoint_path = os.path.join(save_directory, checkpoint_filename)
-
     checkpoint_data = {
         "epoch": epoch_number,
         "model_state_dict": model.state_dict(),
@@ -812,7 +555,6 @@ def save_model_checkpoint(
         "val_accuracy": val_accuracy,
         "viseme_classes": viseme_classes,
     }
-
     torch.save(checkpoint_data, checkpoint_path)
     print(f"Checkpoint saved: {checkpoint_path}")
 
@@ -825,7 +567,6 @@ def save_training_results(
 ) -> None:
     """Save training history and final test metrics to JSON files."""
     os.makedirs(output_directory, exist_ok=True)
-
     history_path = os.path.join(output_directory, "training_history.json")
     metrics_path = os.path.join(output_directory, "final_test_metrics.json")
 
@@ -876,7 +617,6 @@ def main_training_pipeline(
 
     os.makedirs(config.checkpoint_save_directory, exist_ok=True)
     os.makedirs(config.metrics_output_directory, exist_ok=True)
-
     torch.manual_seed(config.random_seed)
     np.random.seed(config.random_seed)
 
@@ -923,16 +663,11 @@ def main_training_pipeline(
         sequence_length_frames=config.sequence_length_frames,
         target_height_pixels=config.video_height_pixels,
         target_width_pixels=config.video_width_pixels,
-        phoneme_intervals_root_directory=(
-            config.phoneme_intervals_root_directory
-        ),
     )
 
     if len(full_dataset) == 0:
         raise RuntimeError(
-            "No valid training samples found. "
-            "Expected either .npy files in viseme folders or "
-            "resolvable source videos via phoneme interval JSON files."
+            f"No .npy samples found in {config.data_root_directory}"
         )
 
     (
@@ -960,9 +695,13 @@ def main_training_pipeline(
     if default_workers > 0:
         common_loader_kwargs["persistent_workers"] = True
 
+    # WeightedRandomSampler forces each batch to be class-balanced
+    train_sampler = build_weighted_sampler(
+        train_dataset, config.number_of_classes
+    )
     train_dataloader = DataLoader(
         train_dataset,
-        shuffle=True,
+        sampler=train_sampler,
         **common_loader_kwargs,
     )
     val_dataloader = DataLoader(
@@ -997,13 +736,13 @@ def main_training_pipeline(
     print(f"Total parameters: {total_parameters:,}")
     print(f"Trainable parameters: {trainable_parameters:,}")
 
-    class_weights = compute_class_weights(
-        train_dataset=train_dataset,
-        number_of_classes=config.number_of_classes,
+    class_weights_tensor = compute_class_weights(
+        train_dataset, config.number_of_classes
     ).to(config.device)
-    print(f"Class weights: {class_weights.cpu().numpy().round(3).tolist()}")
-
-    loss_function = FocalLoss(weight=class_weights, gamma=2.0)
+    loss_function = nn.CrossEntropyLoss(weight=class_weights_tensor)
+    print(
+        "Loss: CrossEntropyLoss with sqrt+cap4x class weights"
+    )
     optimizer = optim.Adam(
         model.parameters(),
         lr=config.learning_rate,
@@ -1042,7 +781,6 @@ def main_training_pipeline(
         checkpoint = torch.load(resume_checkpoint, map_location="cpu")
         checkpoint_state_dict = checkpoint.get("model_state_dict", checkpoint)
         model.load_state_dict(checkpoint_state_dict)
-
         optimizer_state = checkpoint.get("optimizer_state_dict")
         if optimizer_state is not None:
             optimizer.load_state_dict(optimizer_state)
@@ -1117,7 +855,6 @@ def main_training_pipeline(
             optimizer.param_groups[0]["lr"],
             epoch,
         )
-
         training_history.append(
             {
                 "epoch": epoch,
@@ -1240,7 +977,6 @@ if __name__ == "__main__":
     )
 
     cli_args = argument_parser.parse_args()
-
     selected_resume_checkpoint = cli_args.resume_checkpoint
     if cli_args.resume_best:
         selected_resume_checkpoint = (
