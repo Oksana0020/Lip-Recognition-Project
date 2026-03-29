@@ -14,11 +14,11 @@ with open("training/results_bozkurt_viseme/final_test_metrics.json") as f:
     test_metrics = json.load(f)
 
 last_epoch = history["epochs"][-1]
-train_acc = last_epoch["train_accuracy"]           
-val_acc = test_metrics["test_metrics"]["best_validation_accuracy"]   
-test_acc = test_metrics["test_metrics"]["accuracy"]                  
-test_loss = test_metrics["test_metrics"]["loss"]                     
-num_classes = len(test_metrics["viseme_classes"])                   
+train_acc = last_epoch["train_accuracy"]
+val_acc = test_metrics["test_metrics"]["best_validation_accuracy"]
+test_acc = test_metrics["test_metrics"]["accuracy"]
+test_loss = test_metrics["test_metrics"]["loss"]
+num_classes = len(test_metrics["viseme_classes"])
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.set_xlim(0, 10)
 ax.set_ylim(0, 10)
@@ -81,9 +81,16 @@ ax.text(
     ha="center", va="center", fontsize=7.5, color="#888888",
 )
 ax.text(
-    5, 2.35,
-    "Dataset: GRID Corpus  |  Split: 70/15/15 train/val/test  |  Frames: 8  |  Resolution: 64x64",
-    ha="center", va="center", fontsize=7.5, color="#888888",
+    5,
+    2.35,
+    (
+        "Dataset: GRID Corpus  |  Split: 70/15/15 train/val/test  |  "
+        "Total samples: 65,035"
+    ),
+    ha="center",
+    va="center",
+    fontsize=7.5,
+    color="#888888",
 )
 
 plt.tight_layout()

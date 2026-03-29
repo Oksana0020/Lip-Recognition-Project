@@ -1,6 +1,5 @@
 import json
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 with open("training/results_bozkurt_viseme/training_history.json") as f:
     history = json.load(f)
@@ -10,8 +9,10 @@ epochs = [e["epoch"] for e in epochs_data]
 train_acc = [e["train_accuracy"] for e in epochs_data]
 val_acc = [e["val_accuracy"] for e in epochs_data]
 fig, ax = plt.subplots(figsize=(10, 5.5))
-ax.plot(epochs, train_acc, color="#e74c3c", linewidth=2.0, label="Training Accuracy")
-ax.plot(epochs, val_acc, color="#3498db", linewidth=2.0, label="Validation Accuracy")
+ax.plot(epochs, train_acc, color="#e74c3c", linewidth=2.0,
+        label="Training Accuracy")
+ax.plot(epochs, val_acc, color="#3498db", linewidth=2.0,
+        label="Validation Accuracy")
 
 TEST_ACCURACY = 83.77
 ax.axhline(
@@ -23,11 +24,19 @@ ax.axhline(
 )
 
 # Annotate the best validation point
-best_epoch = max(epochs_data, key=lambda e: e["val_accuracy"])
+best_epoch = max(epochs_data, key=lambda epoch: epoch["val_accuracy"])
+best_label = (
+    f"Best val: {best_epoch['val_accuracy']:.2f}%\n"
+    f"(epoch {best_epoch['epoch']})"
+)
+
 ax.annotate(
-    f"Best val: {best_epoch['val_accuracy']:.2f}%\n(epoch {best_epoch['epoch']})",
+    best_label,
     xy=(best_epoch["epoch"], best_epoch["val_accuracy"]),
-    xytext=(best_epoch["epoch"] - 12, best_epoch["val_accuracy"] - 12),
+    xytext=(
+        best_epoch["epoch"] - 12,
+        best_epoch["val_accuracy"] - 12,
+    ),
     arrowprops=dict(arrowstyle="->", color="#555"),
     fontsize=9,
     color="#1a1a2e",
