@@ -1,0 +1,704 @@
+[
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V3\\pwbd7s_19500_EY.npy",
+    "true_label": "V3",
+    "predicted_label": "V11",
+    "top_k": [
+      {
+        "label": "V11",
+        "probability": 0.5436497926712036
+      },
+      {
+        "label": "V3",
+        "probability": 0.45595332980155945
+      },
+      {
+        "label": "V10",
+        "probability": 0.00032655056565999985
+      },
+      {
+        "label": "V2",
+        "probability": 3.0422841518884525e-05
+      },
+      {
+        "label": "V12",
+        "probability": 1.926671393448487e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V11\\lrix6s_10500_L.npy",
+    "true_label": "V11",
+    "predicted_label": "V3",
+    "top_k": [
+      {
+        "label": "V3",
+        "probability": 0.9785487055778503
+      },
+      {
+        "label": "V11",
+        "probability": 0.021331366151571274
+      },
+      {
+        "label": "V12",
+        "probability": 0.00011606021143961698
+      },
+      {
+        "label": "V9",
+        "probability": 2.0910213152092183e-06
+      },
+      {
+        "label": "V10",
+        "probability": 1.7665332734395633e-06
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\pbibzp_19750_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V14",
+    "top_k": [
+      {
+        "label": "V14",
+        "probability": 0.4306360185146332
+      },
+      {
+        "label": "V12",
+        "probability": 0.3000795543193817
+      },
+      {
+        "label": "V15",
+        "probability": 0.2334076464176178
+      },
+      {
+        "label": "V6",
+        "probability": 0.03303506597876549
+      },
+      {
+        "label": "V10",
+        "probability": 0.0013330008368939161
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\prio4p_46750_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.7435289025306702
+      },
+      {
+        "label": "V16",
+        "probability": 0.25545910000801086
+      },
+      {
+        "label": "V12",
+        "probability": 0.0009584328508935869
+      },
+      {
+        "label": "V6",
+        "probability": 2.695380499062594e-05
+      },
+      {
+        "label": "V3",
+        "probability": 2.4546305212425068e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V2\\lgbi9s_34250_AY.npy",
+    "true_label": "V2",
+    "predicted_label": "V11",
+    "top_k": [
+      {
+        "label": "V11",
+        "probability": 0.7742090821266174
+      },
+      {
+        "label": "V2",
+        "probability": 0.22463174164295197
+      },
+      {
+        "label": "V10",
+        "probability": 0.0006858428241685033
+      },
+      {
+        "label": "V3",
+        "probability": 0.00023557351960334927
+      },
+      {
+        "label": "V12",
+        "probability": 0.00018265043036080897
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\bgbb1s_44000_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.6321091055870056
+      },
+      {
+        "label": "V12",
+        "probability": 0.35868725180625916
+      },
+      {
+        "label": "V6",
+        "probability": 0.00841596070677042
+      },
+      {
+        "label": "V11",
+        "probability": 0.0007457343745045364
+      },
+      {
+        "label": "V9",
+        "probability": 4.017446917714551e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V6\\swiu4n_34000_UW.npy",
+    "true_label": "V6",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.997687578201294
+      },
+      {
+        "label": "V12",
+        "probability": 0.0015999173047021031
+      },
+      {
+        "label": "V11",
+        "probability": 0.0005139964050613344
+      },
+      {
+        "label": "V6",
+        "probability": 0.00019493723812047392
+      },
+      {
+        "label": "V9",
+        "probability": 2.6559821435512276e-06
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\pbbc7a_17250_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.9777858853340149
+      },
+      {
+        "label": "V12",
+        "probability": 0.022189956158399582
+      },
+      {
+        "label": "V11",
+        "probability": 1.3156898603483569e-05
+      },
+      {
+        "label": "V9",
+        "probability": 6.69077144266339e-06
+      },
+      {
+        "label": "V15",
+        "probability": 3.1479560220759595e-06
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V2\\pwwd9s_51500_AY.npy",
+    "true_label": "V2",
+    "predicted_label": "V12",
+    "top_k": [
+      {
+        "label": "V12",
+        "probability": 0.45410847663879395
+      },
+      {
+        "label": "V11",
+        "probability": 0.25055211782455444
+      },
+      {
+        "label": "V3",
+        "probability": 0.17427167296409607
+      },
+      {
+        "label": "V10",
+        "probability": 0.10226085036993027
+      },
+      {
+        "label": "V2",
+        "probability": 0.010317901149392128
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V3\\pwwk5s_38000_EY.npy",
+    "true_label": "V3",
+    "predicted_label": "V12",
+    "top_k": [
+      {
+        "label": "V12",
+        "probability": 0.947638750076294
+      },
+      {
+        "label": "V15",
+        "probability": 0.04967457428574562
+      },
+      {
+        "label": "V3",
+        "probability": 0.0015897090779617429
+      },
+      {
+        "label": "V10",
+        "probability": 0.0010130727896466851
+      },
+      {
+        "label": "V11",
+        "probability": 8.29136188258417e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\sgac4p_10250_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V8",
+    "top_k": [
+      {
+        "label": "V8",
+        "probability": 0.9983460903167725
+      },
+      {
+        "label": "V3",
+        "probability": 0.0014490842586383224
+      },
+      {
+        "label": "V12",
+        "probability": 0.00018489669309929013
+      },
+      {
+        "label": "V2",
+        "probability": 1.0823262527992483e-05
+      },
+      {
+        "label": "V6",
+        "probability": 7.5556026786216535e-06
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V11\\lgbz9a_10000_L.npy",
+    "true_label": "V11",
+    "predicted_label": "V3",
+    "top_k": [
+      {
+        "label": "V3",
+        "probability": 0.9508261680603027
+      },
+      {
+        "label": "V11",
+        "probability": 0.04732489585876465
+      },
+      {
+        "label": "V12",
+        "probability": 0.0017761635826900601
+      },
+      {
+        "label": "V10",
+        "probability": 5.249773312243633e-05
+      },
+      {
+        "label": "V2",
+        "probability": 1.901739051390905e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V15\\lgif1s_32250_F.npy",
+    "true_label": "V15",
+    "predicted_label": "V14",
+    "top_k": [
+      {
+        "label": "V14",
+        "probability": 0.9757182598114014
+      },
+      {
+        "label": "V15",
+        "probability": 0.021957293152809143
+      },
+      {
+        "label": "V12",
+        "probability": 0.0011980731505900621
+      },
+      {
+        "label": "V9",
+        "probability": 0.0010937373153865337
+      },
+      {
+        "label": "V10",
+        "probability": 1.8512107999413274e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\srauzn_2500_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.9620835185050964
+      },
+      {
+        "label": "V11",
+        "probability": 0.01630665361881256
+      },
+      {
+        "label": "V3",
+        "probability": 0.011090687476098537
+      },
+      {
+        "label": "V12",
+        "probability": 0.0082923648878932
+      },
+      {
+        "label": "V2",
+        "probability": 0.002039814367890358
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V3\\pwbx8n_11000_EY.npy",
+    "true_label": "V3",
+    "predicted_label": "V12",
+    "top_k": [
+      {
+        "label": "V12",
+        "probability": 0.6723637580871582
+      },
+      {
+        "label": "V11",
+        "probability": 0.14796549081802368
+      },
+      {
+        "label": "V6",
+        "probability": 0.0792461559176445
+      },
+      {
+        "label": "V3",
+        "probability": 0.05493512749671936
+      },
+      {
+        "label": "V10",
+        "probability": 0.03616368770599365
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V3\\lrbozn_10500_EY.npy",
+    "true_label": "V3",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 1.0
+      },
+      {
+        "label": "V12",
+        "probability": 3.9365406767633004e-11
+      },
+      {
+        "label": "V11",
+        "probability": 8.449579577685107e-12
+      },
+      {
+        "label": "V6",
+        "probability": 4.710746116104447e-12
+      },
+      {
+        "label": "V3",
+        "probability": 1.767493703480616e-12
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V10\\bgbhzs_46750_R.npy",
+    "true_label": "V10",
+    "predicted_label": "V9",
+    "top_k": [
+      {
+        "label": "V9",
+        "probability": 0.6745418310165405
+      },
+      {
+        "label": "V10",
+        "probability": 0.28817400336265564
+      },
+      {
+        "label": "V12",
+        "probability": 0.03284606337547302
+      },
+      {
+        "label": "V11",
+        "probability": 0.0032023456878960133
+      },
+      {
+        "label": "V3",
+        "probability": 0.001187014626339078
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V13\\swah6p_40750_CH.npy",
+    "true_label": "V13",
+    "predicted_label": "V3",
+    "top_k": [
+      {
+        "label": "V3",
+        "probability": 0.602445662021637
+      },
+      {
+        "label": "V11",
+        "probability": 0.3582584857940674
+      },
+      {
+        "label": "V12",
+        "probability": 0.03663580119609833
+      },
+      {
+        "label": "V13",
+        "probability": 0.0017090140609070659
+      },
+      {
+        "label": "V10",
+        "probability": 0.0006203532102517784
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\swab4n_32500_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V9",
+    "top_k": [
+      {
+        "label": "V9",
+        "probability": 0.5749156475067139
+      },
+      {
+        "label": "V12",
+        "probability": 0.2550523579120636
+      },
+      {
+        "label": "V11",
+        "probability": 0.16489768028259277
+      },
+      {
+        "label": "V10",
+        "probability": 0.003511810675263405
+      },
+      {
+        "label": "V3",
+        "probability": 0.0009116373839788139
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V11\\lwiyzp_11750_L.npy",
+    "true_label": "V11",
+    "predicted_label": "V3",
+    "top_k": [
+      {
+        "label": "V3",
+        "probability": 0.8300769925117493
+      },
+      {
+        "label": "V11",
+        "probability": 0.16806185245513916
+      },
+      {
+        "label": "V12",
+        "probability": 0.0015780720859766006
+      },
+      {
+        "label": "V2",
+        "probability": 0.00024345159181393683
+      },
+      {
+        "label": "V10",
+        "probability": 3.780307088163681e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V10\\bbbfzp_44500_R.npy",
+    "true_label": "V10",
+    "predicted_label": "V6",
+    "top_k": [
+      {
+        "label": "V6",
+        "probability": 0.8000792860984802
+      },
+      {
+        "label": "V10",
+        "probability": 0.1842128187417984
+      },
+      {
+        "label": "V12",
+        "probability": 0.014602290466427803
+      },
+      {
+        "label": "V11",
+        "probability": 0.0008770883432589471
+      },
+      {
+        "label": "V3",
+        "probability": 0.00017763266805559397
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V3\\pwaq2p_20250_EY.npy",
+    "true_label": "V3",
+    "predicted_label": "V12",
+    "top_k": [
+      {
+        "label": "V12",
+        "probability": 0.9976038336753845
+      },
+      {
+        "label": "V3",
+        "probability": 0.002122023608535528
+      },
+      {
+        "label": "V9",
+        "probability": 0.00021177092276047915
+      },
+      {
+        "label": "V11",
+        "probability": 4.3417589040473104e-05
+      },
+      {
+        "label": "V2",
+        "probability": 1.471036193834152e-05
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V11\\swal1s_31000_L.npy",
+    "true_label": "V11",
+    "predicted_label": "V6",
+    "top_k": [
+      {
+        "label": "V6",
+        "probability": 0.5941110253334045
+      },
+      {
+        "label": "V11",
+        "probability": 0.13578903675079346
+      },
+      {
+        "label": "V12",
+        "probability": 0.12807020545005798
+      },
+      {
+        "label": "V10",
+        "probability": 0.12545481324195862
+      },
+      {
+        "label": "V3",
+        "probability": 0.0148917930200696
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\swan9s_7500_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.9999434947967529
+      },
+      {
+        "label": "V6",
+        "probability": 3.2864125387277454e-05
+      },
+      {
+        "label": "V3",
+        "probability": 1.2782830708601978e-05
+      },
+      {
+        "label": "V12",
+        "probability": 7.476031441910891e-06
+      },
+      {
+        "label": "V11",
+        "probability": 3.341677711432567e-06
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V12\\srwi1p_13250_S.npy",
+    "true_label": "V12",
+    "predicted_label": "V10",
+    "top_k": [
+      {
+        "label": "V10",
+        "probability": 0.9930499792098999
+      },
+      {
+        "label": "V12",
+        "probability": 0.00685676047578454
+      },
+      {
+        "label": "V11",
+        "probability": 8.555164822610095e-05
+      },
+      {
+        "label": "V6",
+        "probability": 6.161152214190224e-06
+      },
+      {
+        "label": "V3",
+        "probability": 1.1951879059779458e-06
+      }
+    ]
+  },
+  {
+    "npy_path": "data\\processed\\visemes_bozkurt_mfa_balanced_npy\\V11\\lbbk6a_6000_L.npy",
+    "true_label": "V11",
+    "predicted_label": "V6",
+    "top_k": [
+      {
+        "label": "V6",
+        "probability": 0.8376889824867249
+      },
+      {
+        "label": "V11",
+        "probability": 0.1599888652563095
+      },
+      {
+        "label": "V10",
+        "probability": 0.001409157644957304
+      },
+      {
+        "label": "V12",
+        "probability": 0.0008507694583386183
+      },
+      {
+        "label": "V3",
+        "probability": 5.887956285732798e-05
+      }
+    ]
+  }
+]
