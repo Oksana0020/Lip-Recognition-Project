@@ -4,6 +4,7 @@ Trains 3D CNN to classify GRID words from lip video clips
 saved as .npy arrays.
 """
 
+import json
 import random
 from dataclasses import dataclass
 from pathlib import Path
@@ -39,7 +40,7 @@ class TrainingConfig:
 
 
 def resolve_training_device() -> torch.device:
-    """Use CUDA if available; otherwise use CPU"""
+    """Use CUDA if available; otherwise use CPU."""
     if torch.cuda.is_available():
         device = torch.device("cuda")
         print(f"Using CUDA GPU: {torch.cuda.get_device_name(0)}")
@@ -62,12 +63,26 @@ class WordLipReadingDataset(Dataset):
         target_frame_count: int,
         target_frame_height: int,
         target_frame_width: int,
+        is_training: bool = False
     ) -> None:
         self.samples = samples
         self.word_to_index_mapping = word_to_index_mapping
         self.target_frame_count = target_frame_count
         self.target_frame_height = target_frame_height
         self.target_frame_width = target_frame_width
+        self.is_training = is_training
+        bbox_json_path = (
+            PROJECT_ROOT / "data" / "processed" / "words_lip_bboxes.json")
+        if bbox_json_path.exists():
+            with open(bbox_json_path, encoding="utf-8") as bbox_file:
+                raw_bbox = json.load(bbox_file)
+            self.lip_bbox_lookup = {
+                key.lower(): value for key, value in raw_bbox.items()}
+            print(
+                f"Loaded {len(self.lip_bbox_lookup):,} precomputed lip bboxes")
+        else:
+            self.lip_bbox_lookup = {}
+            print("WARNING: words_lip_bboxes.json not found; using fixed crop")
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -77,15 +92,33 @@ class WordLipReadingDataset(Dataset):
         frames_file_path = Path(sample_info["frames_path"])
         word_label = sample_info["word"]
         raw_frames = np.load(frames_file_path, allow_pickle=False)
-        processed_frames = self._process_video_frames(raw_frames)
+        processed_frames = self._process_video_frames(
+            raw_frames, frames_file_path)
+
+        if self.is_training:
+            if random.random() < 0.5:
+                processed_frames = processed_frames[:, :, ::-1, :].copy()
+
+            if random.random() < 0.4:
+                factor = random.uniform(0.8, 1.2)
+                processed_frames = np.clip(
+                    processed_frames * factor,
+                    0.0,
+                    1.0)
+
         frames_tensor = torch.from_numpy(processed_frames).float()
         frames_tensor = frames_tensor.permute(3, 0, 1, 2)
         word_class_index = self.word_to_index_mapping[word_label]
         return frames_tensor, word_class_index
 
-    def _process_video_frames(self, video_frames: np.ndarray) -> np.ndarray:
-        """Resample, center crop lower face region, resize, grayscale."""
+    def _process_video_frames(
+        self,
+        video_frames: np.ndarray,
+        frames_file_path: Path
+    ) -> np.ndarray:
+        """Resample, crop lip region, resize, and grayscale frames."""
         current_frame_count = int(video_frames.shape[0])
+
         if current_frame_count > self.target_frame_count:
             frame_indices = np.linspace(
                 0,
@@ -95,36 +128,61 @@ class WordLipReadingDataset(Dataset):
             video_frames = video_frames[frame_indices]
         elif current_frame_count < self.target_frame_count:
             padded_frames = list(video_frames)
+            source_frames = list(video_frames)
             while len(padded_frames) < self.target_frame_count:
-                padded_frames.append(video_frames[-1])
+                padded_frames.extend(
+                    source_frames[
+                        : self.target_frame_count - len(padded_frames)])
             video_frames = np.stack(padded_frames, axis=0)
+
+        lookup_key = str(frames_file_path.resolve()).lower()
+        clip_bbox = self.lip_bbox_lookup.get(lookup_key)
+
+        if clip_bbox is not None:
+            dlib_x0, dlib_y0, dlib_x1, dlib_y1 = clip_bbox
+        else:
+            dlib_x0, dlib_y0, dlib_x1, dlib_y1 = None, None, None, None
+
         resized_frames: List[np.ndarray] = []
 
-        for frame_index in range(self.target_frame_count):
-            frame = video_frames[frame_index]
+        for temporal_frame_index in range(self.target_frame_count):
+            frame = video_frames[temporal_frame_index]
             frame_height, frame_width = frame.shape[:2]
-            crop_y_top = max(0, int(frame_height * 0.66))
-            crop_y_bottom = min(frame_height, int(frame_height * 0.92))
-            crop_x_left = max(0, int(frame_width * 0.33))
-            crop_x_right = min(frame_width, int(frame_width * 0.67))
-            frame = frame[crop_y_top:crop_y_bottom, crop_x_left:crop_x_right]
+
+            if dlib_x0 is not None:
+                crop_x_left = max(0, dlib_x0)
+                crop_y_top = max(0, dlib_y0)
+                crop_x_right = min(frame_width, dlib_x1)
+                crop_y_bottom = min(frame_height, dlib_y1)
+            else:
+                crop_y_top = max(0, int(frame_height * 0.66))
+                crop_y_bottom = min(
+                    frame_height, int(frame_height * 0.92))
+                crop_x_left = max(0, int(frame_width * 0.33))
+                crop_x_right = min(
+                    frame_width, int(frame_width * 0.67))
+
+            frame = frame[
+                crop_y_top:crop_y_bottom, crop_x_left:crop_x_right]
             resized_frame = cv2.resize(
                 frame,
                 (self.target_frame_width, self.target_frame_height))
+
             if resized_frame.ndim == 3:
                 grayscale_frame = cv2.cvtColor(
                     resized_frame,
-                    cv2.COLOR_BGR2GRAY,
-                )
+                    cv2.COLOR_BGR2GRAY)
             else:
                 grayscale_frame = resized_frame
+
             resized_frames.append(grayscale_frame[..., np.newaxis])
+
         processed_frames = np.asarray(resized_frames, dtype=np.float32) / 255.0
         return processed_frames
 
 
 class ThreeDimensionalCNN(nn.Module):
-    """3D CNN for word-level classification"""
+    """3D CNN for word-level classification."""
 
     def __init__(self, input_channels: int, number_of_classes: int) -> None:
         super().__init__()
@@ -182,7 +240,7 @@ class ThreeDimensionalCNN(nn.Module):
 
 
 def load_word_dataset(
-    data_root: Path,
+    data_root: Path
 ) -> Tuple[List[Dict], Dict[str, int], Dict[int, str]]:
     """Load all word clips from label folders."""
     print("Loading word dataset")
@@ -219,7 +277,7 @@ def load_word_dataset(
 def build_data_loader(
     dataset: Dataset,
     batch_size: int,
-    shuffle: bool,
+    shuffle: bool
 ) -> DataLoader:
     """Build DataLoader for dataset."""
     return DataLoader(
@@ -234,7 +292,7 @@ def run_one_epoch_train(
     data_loader: DataLoader,
     loss_function: nn.Module,
     optimizer: optim.Optimizer,
-    device: torch.device,
+    device: torch.device
 ) -> Tuple[float, float]:
     """Run one training epoch."""
     model.train()
@@ -265,7 +323,7 @@ def run_one_epoch_eval(
     model: nn.Module,
     data_loader: DataLoader,
     loss_function: nn.Module,
-    device: torch.device,
+    device: torch.device
 ) -> Tuple[float, float]:
     """Run one evaluation epoch."""
     model.eval()
@@ -300,7 +358,8 @@ def main() -> None:
     torch.manual_seed(config.random_seed)
     np.random.seed(config.random_seed)
     random.seed(config.random_seed)
-    all_samples, word_to_index, _ = load_word_dataset(config.data_root_directory)
+    all_samples, word_to_index, _ = load_word_dataset(
+        config.data_root_directory)
     number_of_classes = len(word_to_index)
     all_samples_shuffled = list(all_samples)
     random.shuffle(all_samples_shuffled)
@@ -312,7 +371,7 @@ def main() -> None:
     validation_samples = all_samples_shuffled[
         train_sample_count:train_sample_count + validation_sample_count]
     test_samples = all_samples_shuffled[
-        train_sample_count + validation_sample_count]
+        train_sample_count + validation_sample_count:]
 
     print(
         f"Split: Train={len(train_samples)}, "
@@ -324,43 +383,45 @@ def main() -> None:
         word_to_index_mapping=word_to_index,
         target_frame_count=config.target_frame_count,
         target_frame_height=config.target_frame_height,
-        target_frame_width=config.target_frame_width)
-    
+        target_frame_width=config.target_frame_width,
+        is_training=True)
+
     validation_dataset = WordLipReadingDataset(
         samples=validation_samples,
         word_to_index_mapping=word_to_index,
         target_frame_count=config.target_frame_count,
         target_frame_height=config.target_frame_height,
         target_frame_width=config.target_frame_width)
-    
+
     test_dataset = WordLipReadingDataset(
         samples=test_samples,
         word_to_index_mapping=word_to_index,
         target_frame_count=config.target_frame_count,
         target_frame_height=config.target_frame_height,
         target_frame_width=config.target_frame_width)
-    
+
     train_loader = build_data_loader(
         train_dataset,
         batch_size=config.batch_size,
         shuffle=True)
-    
+
     validation_loader = build_data_loader(
         validation_dataset,
         batch_size=config.batch_size,
         shuffle=False)
-    
+
     test_loader = build_data_loader(
         test_dataset,
         batch_size=config.batch_size,
         shuffle=False)
-    
+
     model = ThreeDimensionalCNN(
         input_channels=config.input_channels,
-        number_of_classes=number_of_classes,
-    ).to(config.device)
+        number_of_classes=number_of_classes).to(config.device)
+
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+
     for epoch in range(1, config.number_of_epochs + 1):
         print(f"\nEpoch {epoch}/{config.number_of_epochs}")
         print("-" * 80)
@@ -381,6 +442,7 @@ def main() -> None:
         print(
             f"Val   Loss: {validation_loss:.4f} | "
             f"Val   Acc: {validation_accuracy:.2f}%")
+
     print("\n" + "=" * 80)
     print("FINAL EVALUATION ON TEST SET")
     print("=" * 80)
