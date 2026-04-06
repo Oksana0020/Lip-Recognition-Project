@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -78,8 +79,7 @@ class WordLipReadingDataset(Dataset):
         target_frame_count: int,
         target_frame_height: int,
         target_frame_width: int,
-        is_training: bool = False
-    ):
+        is_training: bool = False):
         self.samples = samples
         self.word_to_index_mapping = word_to_index_mapping
         self.target_frame_count = target_frame_count
@@ -131,7 +131,7 @@ class WordLipReadingDataset(Dataset):
         video_frames: np.ndarray,
         frames_file_path: Path
     ) -> np.ndarray:
-        """Resample, crop lip region, resize, and grayscale frames."""
+        """Resample, crop lip region, resize and grayscale frames."""
         current_frame_count = int(video_frames.shape[0])
 
         if current_frame_count > self.target_frame_count:
@@ -439,6 +439,36 @@ def save_model_checkpoint(
     print(f"Checkpoint saved: {save_path}")
 
 
+def plot_training_history(
+    train_losses: List[float],
+    validation_losses: List[float],
+    validation_accuracies: List[float],
+    save_path: Path
+) -> None:
+    epochs = list(range(1, len(train_losses) + 1))
+    figure, (axis_loss, axis_accuracy) = plt.subplots(1, 2, figsize=(14, 5))
+    axis_loss.plot(epochs, train_losses, label="Train Loss")
+    axis_loss.plot(epochs, validation_losses, label="Validation Loss")
+    axis_loss.set_xlabel("Epoch")
+    axis_loss.set_ylabel("Loss")
+    axis_loss.set_title("Loss")
+    axis_loss.grid(True)
+    axis_loss.legend()
+    axis_accuracy.plot(
+        epochs,
+        validation_accuracies,
+        label="Validation Accuracy")
+    axis_accuracy.set_xlabel("Epoch")
+    axis_accuracy.set_ylabel("Accuracy (%)")
+    axis_accuracy.set_title("Validation Accuracy")
+    axis_accuracy.grid(True)
+    axis_accuracy.legend()
+    figure.tight_layout()
+    plt.savefig(save_path)
+    plt.close(figure)
+    print(f"Training history plot saved: {save_path}")
+
+
 def main() -> None:
     print("=" * 80)
     print("WORD-LEVEL LIP READING 3D CNN TRAINING")
@@ -447,6 +477,8 @@ def main() -> None:
     config.device = resolve_training_device()
     config.checkpoint_save_directory.mkdir(parents=True, exist_ok=True)
     config.tensorboard_log_directory.mkdir(parents=True, exist_ok=True)
+    results_directory = PROJECT_ROOT / "training" / "results_words"
+    results_directory.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(config.random_seed)
     np.random.seed(config.random_seed)
     random.seed(config.random_seed)
@@ -558,7 +590,12 @@ def main() -> None:
         verbose=True)
 
     tensorboard_writer = SummaryWriter(str(config.tensorboard_log_directory))
+    train_loss_history: List[float] = []
+    train_accuracy_history: List[float] = []
+    validation_loss_history: List[float] = []
+    validation_accuracy_history: List[float] = []
     best_validation_accuracy = 0.0
+    best_epoch = 0
     epochs_without_improvement = 0
 
     for epoch in range(1, config.number_of_epochs + 1):
@@ -579,6 +616,10 @@ def main() -> None:
             device=config.device)
 
         learning_rate_scheduler.step(validation_loss)
+        train_loss_history.append(train_loss)
+        train_accuracy_history.append(train_accuracy)
+        validation_loss_history.append(validation_loss)
+        validation_accuracy_history.append(validation_accuracy)
         tensorboard_writer.add_scalar("Loss/train", train_loss, epoch)
         tensorboard_writer.add_scalar(
             "Loss/validation",
@@ -603,6 +644,7 @@ def main() -> None:
 
         if validation_accuracy > best_validation_accuracy:
             best_validation_accuracy = validation_accuracy
+            best_epoch = epoch
             epochs_without_improvement = 0
             best_model_path = (
                 config.checkpoint_save_directory / "best_model_words.pth")
@@ -666,6 +708,51 @@ def main() -> None:
 
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_accuracy:.2f}%")
+    print(
+        f"Best validation accuracy: {best_validation_accuracy:.2f}% "
+        f"at epoch {best_epoch}")
+
+    training_plot_path = (
+        config.checkpoint_save_directory / "training_history.png")
+    plot_training_history(
+        train_losses=train_loss_history,
+        validation_losses=validation_loss_history,
+        validation_accuracies=validation_accuracy_history,
+        save_path=training_plot_path)
+
+    history_data = {
+        "word_classes": sorted(word_to_index.keys()),
+        "epochs": [
+            {
+                "epoch": epoch_index + 1,
+                "train_loss": train_loss_history[epoch_index],
+                "train_accuracy": train_accuracy_history[epoch_index],
+                "val_loss": validation_loss_history[epoch_index],
+                "val_accuracy": validation_accuracy_history[epoch_index],
+            }
+            for epoch_index in range(len(train_loss_history))
+        ],
+    }
+    final_metrics = {
+        "word_classes": sorted(word_to_index.keys()),
+        "test_metrics": {
+            "loss": test_loss,
+            "accuracy": test_accuracy,
+            "best_validation_accuracy": best_validation_accuracy,
+        },
+    }
+
+    history_json_path = results_directory / "training_history.json"
+    final_metrics_path = results_directory / "final_test_metrics.json"
+
+    with history_json_path.open("w", encoding="utf-8") as history_file:
+        json.dump(history_data, history_file, indent=2)
+
+    with final_metrics_path.open("w", encoding="utf-8") as metrics_file:
+        json.dump(final_metrics, metrics_file, indent=2)
+
+    print(f"Training history saved: {history_json_path}")
+    print(f"Final test metrics saved: {final_metrics_path}")
     tensorboard_writer.close()
     print("\n" + "=" * 80)
     print("TRAINING COMPLETED")
