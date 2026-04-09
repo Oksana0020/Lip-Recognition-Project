@@ -110,34 +110,52 @@ def record_webcam_clip(
 
 def preprocess_video_frames(
     video_frames: np.ndarray,
-    target_num_frames: int = 40,
-    target_height: int = 48,
-    target_width: int = 48,
+    target_num_frames: int = 8,
+    target_height: int = 64,
+    target_width: int = 64,
+    clip_bbox: list | None = None,
 ) -> torch.Tensor:
-    """Preprocess video frames for model input"""
+    """Preprocess video frames to match training pipeline:
+    crop, resize, normalise and convert to tensor
+    """
     current_num_frames = video_frames.shape[0]
-    # standardize number of frames
     if current_num_frames > target_num_frames:
         frame_indices = np.linspace(
-            0,
-            current_num_frames - 1,
-            target_num_frames,
-            dtype=int)
+            0, current_num_frames - 1, target_num_frames, dtype=int)
         video_frames = video_frames[frame_indices]
     elif current_num_frames < target_num_frames:
-        frames_needed = target_num_frames - current_num_frames
-        padding_frames = np.repeat(video_frames[-1:], frames_needed, axis=0)
-        video_frames = np.concatenate([video_frames, padding_frames], axis=0)
+        padded = list(video_frames)
+        src = list(video_frames)
+        while len(padded) < target_num_frames:
+            padded.extend(src[: target_num_frames - len(padded)])
+        video_frames = np.stack(padded, axis=0)
+    dlib_x0 = None
+    if clip_bbox is not None:
+        dlib_x0, dlib_y0, dlib_x1, dlib_y1 = clip_bbox
     resized_frames = []
     for frame in video_frames:
-        resized_frame = cv2.resize(frame, (target_width, target_height))
-        resized_frames.append(resized_frame)
-    processed_frames = np.array(resized_frames)
-    processed_frames = processed_frames.astype(np.float32) / 255.0
-    frames_tensor = torch.from_numpy(processed_frames).float()
-    frames_tensor = frames_tensor.permute(3, 0, 1, 2)  # [C, T, H, W]
-    frames_tensor = frames_tensor.unsqueeze(0)
-    return frames_tensor
+        frame_h, frame_w = frame.shape[:2]
+        if dlib_x0 is not None:
+            x0 = max(0, dlib_x0)
+            y0 = max(0, dlib_y0)
+            x1 = min(frame_w, dlib_x1)
+            y1 = min(frame_h, dlib_y1)
+        else:
+            y0 = max(0, int(frame_h * 0.66))
+            y1 = min(frame_h, int(frame_h * 0.92))
+            x0 = max(0, int(frame_w * 0.33))
+            x1 = min(frame_w, int(frame_w * 0.67))
+        frame = frame[y0:y1, x0:x1]
+        resized = cv2.resize(frame, (target_width, target_height))
+        if resized.ndim == 3 and resized.shape[2] == 3:
+            resized = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+        resized_frames.append(resized)
+    # normalise
+    processed = np.array(resized_frames, dtype=np.float32) / 255.0
+    tensor = torch.from_numpy(processed).float()
+    tensor = tensor.unsqueeze(0)
+    tensor = tensor.unsqueeze(0)
+    return tensor
 
 
 def predict_word(
@@ -202,6 +220,7 @@ def main():
         parser.error("Provide --video_path or use --record_webcam")
     device = resolve_inference_device()
     print(f"Using device: {device}\n")
+
     # Load model
     checkpoint_path = Path(args.checkpoint)
     if not checkpoint_path.exists():
@@ -227,16 +246,36 @@ def main():
             print(f"Error: Video file not found at {video_path}")
             return
 
+    # Load lip bounding boxes
+    bbox_json_path = (
+        PROJECT_ROOT / "data" / "processed" / "words_lip_bboxes.json")
+    lip_bbox_lookup: dict = {}
+    if bbox_json_path.exists():
+        import json
+        with open(bbox_json_path, encoding="utf-8") as f:
+            raw = json.load(f)
+        lip_bbox_lookup = {k.lower(): v for k, v in raw.items()}
+        print(f"Loaded {len(lip_bbox_lookup):,} lip bboxes")
+    else:
+        print("words_lip_bboxes.json not found — using fallback crop")
+
     print(f"\nLoading video from: {video_path}")
     video_frames = load_video_frames_from_file(video_path)
     print(f"Original video shape: {video_frames.shape}")
+    lookup_key = str(video_path.resolve()).lower()
+    clip_bbox = lip_bbox_lookup.get(lookup_key)
+    if clip_bbox:
+        print(f"Lip bbox found: {clip_bbox}")
+    else:
+        print("No bbox found — using fallback crop (lower-middle third)")
     # preprocess
     print("Preprocessing video")
     preprocessed_frames = preprocess_video_frames(
         video_frames,
-        target_num_frames=int(model_config.get("target_frame_count", 40)),
-        target_height=int(model_config.get("target_frame_height", 48)),
-        target_width=int(model_config.get("target_frame_width", 48)))
+        target_num_frames=int(model_config.get("target_frame_count", 8)),
+        target_height=int(model_config.get("target_frame_height", 64)),
+        target_width=int(model_config.get("target_frame_width", 64)),
+        clip_bbox=clip_bbox)
     print(f"Preprocessed shape: {preprocessed_frames.shape}")
     print("\nRunning inference")
     predictions = predict_word(
