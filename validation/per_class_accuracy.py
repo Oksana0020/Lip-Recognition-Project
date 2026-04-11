@@ -24,13 +24,25 @@ def load_viseme_model_and_dataset(
     from training.train_viseme_recognition_bozkurt_3d_cnn import (
         BozkurtVisemeLipReadingDataset,
         BozkurtVisemeTrainingConfig,
-        ThreeDimensionalCNN,
+        ThreeDimensionalCNN
     )
     checkpoint_data = torch.load(checkpoint_path, map_location="cpu")
     viseme_class_labels = checkpoint_data["viseme_classes"]
     training_config = BozkurtVisemeTrainingConfig()
+    resolved_data_root = str(data_root)
+    first_class_dir = Path(resolved_data_root) / viseme_class_labels[0]
+    if first_class_dir.exists():
+        npy_count = sum(
+            1 for f in first_class_dir.iterdir() if f.suffix == ".npy"
+        )
+        if npy_count == 0:
+            resolved_data_root = training_config.data_root_directory
+            print(
+                f"Note: supplied data-root has no .npy files; "
+                f"using training config path: {resolved_data_root}"
+            )
     dataset = BozkurtVisemeLipReadingDataset(
-        data_root_directory=str(data_root),
+        data_root_directory=resolved_data_root,
         viseme_class_labels=viseme_class_labels,
         sequence_length_frames=training_config.sequence_length_frames,
         target_height_pixels=training_config.video_height_pixels,
@@ -80,7 +92,7 @@ def load_word_model_and_dataset(
     )
     checkpoint_data = torch.load(checkpoint_path, map_location="cpu")
     model = ThreeDimensionalCNN(
-        input_channels=3,
+        input_channels=1,
         number_of_classes=len(word_to_index),
     )
     model.load_state_dict(checkpoint_data["model_state_dict"])
@@ -136,6 +148,7 @@ def save_results_plot(
     results: Dict[str, Dict[str, float]],
     output_directory: Path,
     top_n: int = 20,
+    task_label: str = "",
 ) -> None:
     """Save per-class accuracy bar chart"""
     sorted_results = sorted(
@@ -166,7 +179,10 @@ def save_results_plot(
 
     plt.xticks(rotation=45, ha="right")
     plt.ylabel("Accuracy (%)")
-    plt.title(f"Per-Class Accuracy (Top {len(class_labels)} by support)")
+    prefix = f"{task_label} — " if task_label else ""
+    plt.title(
+        f"{prefix}Per-Class Accuracy (Top {len(class_labels)} by support)"
+    )
     plt.ylim(0, 110)
     plt.tight_layout()
     output_directory.mkdir(parents=True, exist_ok=True)
@@ -236,8 +252,11 @@ def main() -> None:
         class_labels=class_labels,
         device=device,
     )
+    task_label = "Viseme Level" if args.task == "viseme" else "Word Level"
     save_results_csv(results, args.outdir)
-    save_results_plot(results, args.outdir, top_n=args.top_n)
+    save_results_plot(
+        results, args.outdir, top_n=args.top_n, task_label=task_label
+    )
     print(f"Saved per-class accuracy to: {args.outdir}")
 
 

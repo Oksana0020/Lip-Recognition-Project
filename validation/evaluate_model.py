@@ -75,8 +75,7 @@ def load_word_model(
 ) -> Tuple[torch.nn.Module, List[str]]:
     """Load a trained word-level model and ordered class labels."""
     from training.train_word_recognition_3d_cnn import (
-        ThreeDimensionalCNN,
-    )
+        ThreeDimensionalCNN)
     checkpoint = torch.load(checkpoint_path, map_location=device)
     word_to_index = checkpoint["word_to_index"]
     raw_index_to_word = checkpoint["index_to_word"]
@@ -86,8 +85,8 @@ def load_word_model(
     }
     class_count = len(word_to_index)
     model = ThreeDimensionalCNN(
-        input_channels=3,
-        num_classes=class_count,
+        input_channels=1,
+        number_of_classes=class_count,
     )
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
@@ -139,8 +138,7 @@ class NpyClassificationDataset(Dataset):
         self.channels = channels
         self.use_time_first_layout = use_time_first_layout
         self.label_to_index = {
-            label: index for index, label in enumerate(class_labels)
-        }
+            label: index for index, label in enumerate(class_labels)}
         self.samples = self._collect_samples()
 
     def _collect_samples(self) -> List[Tuple[Path, int]]:
@@ -159,7 +157,7 @@ class NpyClassificationDataset(Dataset):
         return len(self.samples)
 
     def _resize_sequence_length(self, frames: np.ndarray) -> np.ndarray:
-        """Trim or loop-pad frames to the required sequence length."""
+        """Trim frames to the required sequence length."""
         current_frame_count = frames.shape[0]
         if current_frame_count >= self.sequence_length:
             sampled_indices = np.linspace(
@@ -233,7 +231,8 @@ def save_confusion_matrix_plot(
         confusion / row_totals,
         0.0,
     )
-    figure, axis = plt.subplots(figsize=(11, 10))
+    n = len(class_labels)
+    figure, axis = plt.subplots(figsize=(22, 20))
     image = axis.imshow(
         normalized_confusion,
         interpolation="nearest",
@@ -241,33 +240,39 @@ def save_confusion_matrix_plot(
         vmin=0,
         vmax=1,
     )
-    figure.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
-    axis.set_title("Confusion Matrix (row-normalised recall)")
-    axis.set_xlabel("Predicted")
-    axis.set_ylabel("True")
-    tick_positions = np.arange(len(class_labels))
+    cbar = figure.colorbar(image, ax=axis, fraction=0.03, pad=0.02)
+    cbar.ax.tick_params(labelsize=11)
+    axis.set_title(
+        "Confusion Matrix (row-normalised recall)",
+        fontsize=16,
+        pad=14,
+    )
+    axis.set_xlabel("Predicted", fontsize=13, labelpad=10)
+    axis.set_ylabel("True", fontsize=13, labelpad=10)
+    tick_positions = np.arange(n)
     axis.set_xticks(tick_positions)
     axis.set_yticks(tick_positions)
-    axis.set_xticklabels(class_labels, rotation=45, ha="right")
-    axis.set_yticklabels(class_labels)
-    threshold = 0.5
-    for true_index in range(len(class_labels)):
-        for predicted_index in range(len(class_labels)):
-            count = int(confusion[true_index, predicted_index])
-            percentage = normalized_confusion[true_index, predicted_index]
-            text_color = "white" if percentage > threshold else "black"
+    axis.set_xticklabels(class_labels, rotation=60, ha="right", fontsize=10)
+    axis.set_yticklabels(class_labels, fontsize=10)
+    for true_index in range(n):
+        for pred_index in range(n):
+            pct = normalized_confusion[true_index, pred_index]
+            if true_index == pred_index or pct < 0.05:
+                continue
+            text_color = "white" if pct > 0.5 else "black"
             axis.text(
-                predicted_index,
+                pred_index,
                 true_index,
-                f"{count}\n{percentage * 100:.0f}%",
+                f"{pct * 100:.0f}%",
                 ha="center",
                 va="center",
                 color=text_color,
-                fontsize=7,
+                fontsize=7.5,
+                fontweight="bold",
             )
     plt.tight_layout()
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_path, dpi=160, bbox_inches="tight")
+    plt.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(figure)
 
 
@@ -312,9 +317,30 @@ def write_evaluation_outputs(
     )
     report_path = output_directory / "classification_report.txt"
     report_path.write_text(report_text, encoding="utf-8")
-    confusion = confusion_matrix(true_labels, predicted_labels)
+    # Confusion matrix for only multi-character labels
+    word_indices = [
+        i for i, lbl in enumerate(class_labels) if len(lbl) > 1
+    ]
+    word_labels = [class_labels[i] for i in word_indices]
+    word_index_set = set(word_indices)
+    # Remap to word-only subset
+    old_to_new = {old: new for new, old in enumerate(word_indices)}
+    filtered_pairs = [
+        (old_to_new[t], old_to_new[p])
+        for t, p in zip(true_labels, predicted_labels)
+        if t in word_index_set and p in word_index_set
+    ]
+    if filtered_pairs:
+        f_true, f_pred = zip(*filtered_pairs)
+        confusion = confusion_matrix(
+            list(f_true), list(f_pred),
+            labels=list(range(len(word_labels))),
+        )
+    else:
+        confusion = confusion_matrix(true_labels, predicted_labels)
+        word_labels = class_labels
     confusion_path = output_directory / "confusion_matrix.png"
-    save_confusion_matrix_plot(confusion, class_labels, confusion_path)
+    save_confusion_matrix_plot(confusion, word_labels, confusion_path)
     report_dict = classification_report(
         true_labels,
         predicted_labels,
@@ -363,7 +389,7 @@ def load_model_and_labels(
     """Load model, class labels, channels and tensor layout settings"""
     if task_name == "word":
         model, class_labels = load_word_model(checkpoint_path, device)
-        return model, class_labels, 3, False
+        return model, class_labels, 1, False
 
     model, class_labels = load_viseme_model(checkpoint_path, device)
     return model, class_labels, 1, True
@@ -380,15 +406,31 @@ def main() -> None:
     model, class_labels, channels, use_time_first_layout = (
         load_model_and_labels(args.task, checkpoint_path, device)
     )
-    dataset = NpyClassificationDataset(
-        data_root=data_root,
-        class_labels=class_labels,
-        sequence_length=args.frames,
-        frame_height=args.height,
-        frame_width=args.width,
-        channels=channels,
-        use_time_first_layout=use_time_first_layout,
-    )
+
+    if args.task == "word":
+        from training.train_word_recognition_3d_cnn import (
+            WordLipReadingDataset,
+            load_word_dataset,
+        )
+        sample_list, word_to_index, _ = load_word_dataset(data_root)
+        dataset = WordLipReadingDataset(
+            samples=sample_list,
+            word_to_index_mapping=word_to_index,
+            target_frame_count=args.frames,
+            target_frame_height=args.height,
+            target_frame_width=args.width,
+            is_training=False,
+        )
+    else:
+        dataset = NpyClassificationDataset(
+            data_root=data_root,
+            class_labels=class_labels,
+            sequence_length=args.frames,
+            frame_height=args.height,
+            frame_width=args.width,
+            channels=channels,
+            use_time_first_layout=use_time_first_layout,
+        )
 
     if len(dataset) == 0:
         raise RuntimeError(
