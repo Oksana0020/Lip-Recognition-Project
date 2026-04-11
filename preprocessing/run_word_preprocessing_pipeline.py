@@ -6,20 +6,21 @@ Complete pipeline for word-level preprocessing for GRID dataset:
 """
 
 from __future__ import annotations
-
 import argparse
 import json
 import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
 import cv2
 import numpy as np
 from tqdm import tqdm
 
 BASE_DIR = Path(__file__).parent.parent
 sys.path.append(str(BASE_DIR))
+DEFAULT_TARGET_FRAME_COUNT = 40
+DEFAULT_TARGET_FRAME_HEIGHT = 48
+DEFAULT_TARGET_FRAME_WIDTH = 48
 
 
 def find_all_grid_videos() -> List[Dict[str, str]]:
@@ -103,10 +104,8 @@ def extract_word_frames(
     """ Extract video frames corresponding to a word segment."""
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
-
     start_frame_idx = int(word_info["start_time"] * fps)
     end_frame_idx = int(word_info["end_time"] * fps)
-
     frames: List[np.ndarray] = []
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame_idx)
 
@@ -123,6 +122,39 @@ def extract_word_frames(
     return None
 
 
+def standardize_word_frames(
+    frames: np.ndarray,
+    target_frame_count: int,
+    target_frame_height: int,
+    target_frame_width: int,
+) -> np.ndarray:
+    """Resample and resize frames to a fixed clip shape."""
+    current_frame_count = int(frames.shape[0])
+
+    if current_frame_count > target_frame_count:
+        frame_indices = np.linspace(
+            0,
+            current_frame_count - 1,
+            target_frame_count,
+            dtype=int,
+        )
+        frames = frames[frame_indices]
+    elif current_frame_count < target_frame_count:
+        frames_needed = target_frame_count - current_frame_count
+        padding_frames = np.repeat(frames[-1:], frames_needed, axis=0)
+        frames = np.concatenate([frames, padding_frames], axis=0)
+
+    resized_frames: List[np.ndarray] = []
+    for frame in frames:
+        resized_frame = cv2.resize(
+            frame,
+            (target_frame_width, target_frame_height),
+        )
+        resized_frames.append(resized_frame)
+
+    return np.asarray(resized_frames, dtype=np.uint8)
+
+
 def save_word_segment(
     frames: np.ndarray,
     word_info: Dict[str, Any],
@@ -137,11 +169,9 @@ def save_word_segment(
 
     word_dir = output_root / word_label
     word_dir.mkdir(parents=True, exist_ok=True)
-
     filename = (
         f"{video_name}_word_{int(word_info['start_frame'])}_{word_label}"
     )
-
     frames_file = word_dir / f"{filename}.npy"
     np.save(frames_file, frames)
 
@@ -156,6 +186,7 @@ def save_word_segment(
         "source_video": video_name,
         "speaker_id": speaker_id,
         "frame_shape": list(frames.shape),
+        "preprocessed_for_training": True
     }
 
     metadata_file = word_dir / f"{filename}.json"
@@ -168,8 +199,11 @@ def save_word_segment(
 def process_single_video(
     video_info: Dict[str, str],
     output_root: Path,
+    target_frame_count: int,
+    target_frame_height: int,
+    target_frame_width: int,
 ) -> Dict[str, Any]:
-    """Process one video and extract all non-sil word segments."""
+    """Process one video and extract all non-sil word segments"""
     video_path = Path(video_info["video_path"])
     alignment_path = Path(video_info["alignment_path"])
     base_name = video_info["base_name"]
@@ -187,6 +221,12 @@ def process_single_video(
 
             frames = extract_word_frames(str(video_path), word_info)
             if frames is not None and len(frames) > 0:
+                frames = standardize_word_frames(
+                    frames=frames,
+                    target_frame_count=target_frame_count,
+                    target_frame_height=target_frame_height,
+                    target_frame_width=target_frame_width,
+                )
                 saved = save_word_segment(
                     frames=frames,
                     word_info=word_info,
@@ -259,8 +299,7 @@ def collect_word_statistics(output_root: Path) -> Dict[str, Any]:
             if frame_counts else 0.0,
             "min_frames": int(np.min(frame_counts)) if frame_counts else 0,
             "max_frames": int(np.max(frame_counts)) if frame_counts else 0,
-            "num_speakers": len(speakers),
-        }
+            "num_speakers": len(speakers)}
 
         total_samples += len(npy_files)
 
@@ -315,6 +354,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Limit number of videos to process",
     )
+    parser.add_argument(
+        "--target-frame-count",
+        type=int,
+        default=DEFAULT_TARGET_FRAME_COUNT,
+        help="Number of frames to save per word clip",
+    )
+    parser.add_argument(
+        "--target-frame-height",
+        type=int,
+        default=DEFAULT_TARGET_FRAME_HEIGHT,
+        help="Saved frame height for word clips",
+    )
+    parser.add_argument(
+        "--target-frame-width",
+        type=int,
+        default=DEFAULT_TARGET_FRAME_WIDTH,
+        help="Saved frame width for word clips",
+    )
     return parser
 
 
@@ -329,10 +386,14 @@ def main() -> None:
     print("GRID Word-Level Preprocessing Pipeline")
     print("=" * 60)
     print(f"Output directory: {output_root}")
+    print(
+        "Target saved clip shape: "
+        f"({args.target_frame_count}, "
+        f"{args.target_frame_height}, {args.target_frame_width}, 3)"
+    )
     if args.limit:
         print(f"Processing limit: {args.limit} videos")
     print("=" * 60 + "\n")
-
     print("Step 1: Finding GRID videos...")
     video_pairs = find_all_grid_videos()
 
@@ -347,7 +408,13 @@ def main() -> None:
     total_failed = 0
 
     for video_info in tqdm(video_pairs, desc="Processing videos"):
-        result = process_single_video(video_info, output_root)
+        result = process_single_video(
+            video_info,
+            output_root,
+            target_frame_count=args.target_frame_count,
+            target_frame_height=args.target_frame_height,
+            target_frame_width=args.target_frame_width
+        )
         results.append(result)
 
         if result["status"] == "success":
@@ -361,13 +428,11 @@ def main() -> None:
         "failed_videos": sum(1 for r in results if r["status"] == "failed"),
         "total_words_extracted": total_words,
         "total_words_failed": total_failed,
-        "results": results,
-    }
+        "results": results}
 
     summary_file = output_root / "extraction_summary.json"
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-
     print("\n" + "=" * 60)
     print("Extraction Summary")
     print("=" * 60)
@@ -377,9 +442,7 @@ def main() -> None:
     print(f"Total words extracted: {total_words}")
     print(f"Total words failed: {total_failed}")
     print(f"Summary saved to: {summary_file}")
-
     collect_word_statistics(output_root)
-
     print("\n" + "=" * 60)
     print("Pipeline Complete!")
     print("=" * 60)
