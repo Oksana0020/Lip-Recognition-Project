@@ -73,13 +73,13 @@ class WordLipReadingDataset(Dataset):
     """
 
     def __init__(
-        self,
-        samples: List[Dict],
-        word_to_index_mapping: Dict[str, int],
-        target_frame_count: int,
-        target_frame_height: int,
-        target_frame_width: int,
-        is_training: bool = False):
+            self,
+            samples: List[Dict],
+            word_to_index_mapping: Dict[str, int],
+            target_frame_count: int,
+            target_frame_height: int,
+            target_frame_width: int,
+            is_training: bool = False):
         self.samples = samples
         self.word_to_index_mapping = word_to_index_mapping
         self.target_frame_count = target_frame_count
@@ -109,18 +109,15 @@ class WordLipReadingDataset(Dataset):
         raw_frames = np.load(frames_file_path, allow_pickle=False)
         processed_frames = self._process_video_frames(
             raw_frames, frames_file_path)
-
         if self.is_training:
             if random.random() < 0.5:
                 processed_frames = processed_frames[:, :, ::-1, :].copy()
-
             if random.random() < 0.4:
                 factor = random.uniform(0.8, 1.2)
                 processed_frames = np.clip(
                     processed_frames * factor,
                     0.0,
                     1.0)
-
         frames_tensor = torch.from_numpy(processed_frames).float()
         frames_tensor = frames_tensor.permute(3, 0, 1, 2)
         word_class_index = self.word_to_index_mapping[word_label]
@@ -152,14 +149,11 @@ class WordLipReadingDataset(Dataset):
 
         lookup_key = str(frames_file_path.resolve()).lower()
         clip_bbox = self.lip_bbox_lookup.get(lookup_key)
-
         if clip_bbox is not None:
             dlib_x0, dlib_y0, dlib_x1, dlib_y1 = clip_bbox
         else:
             dlib_x0, dlib_y0, dlib_x1, dlib_y1 = None, None, None, None
-
         resized_frames: List[np.ndarray] = []
-
         for temporal_frame_index in range(self.target_frame_count):
             frame = video_frames[temporal_frame_index]
             frame_height, frame_width = frame.shape[:2]
@@ -189,9 +183,7 @@ class WordLipReadingDataset(Dataset):
                     cv2.COLOR_BGR2GRAY)
             else:
                 grayscale_resized_frame = resized_frame
-
             resized_frames.append(grayscale_resized_frame[..., np.newaxis])
-
         processed_frames = np.asarray(resized_frames, dtype=np.float32) / 255.0
         return processed_frames
 
@@ -302,10 +294,8 @@ def build_weighted_sampler(
     """
     num_classes = len(word_to_index)
     class_counts = np.zeros(num_classes, dtype=np.float64)
-
     for sample_info in samples:
         class_counts[word_to_index[sample_info["word"]]] += 1.0
-
     safe_counts = np.maximum(class_counts, 1.0)
     class_weights = 1.0 / safe_counts
     sample_weights = np.array(
@@ -744,10 +734,8 @@ def main() -> None:
 
     history_json_path = results_directory / "training_history.json"
     final_metrics_path = results_directory / "final_test_metrics.json"
-
     with history_json_path.open("w", encoding="utf-8") as history_file:
         json.dump(history_data, history_file, indent=2)
-
     with final_metrics_path.open("w", encoding="utf-8") as metrics_file:
         json.dump(final_metrics, metrics_file, indent=2)
 
