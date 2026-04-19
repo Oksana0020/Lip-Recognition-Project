@@ -1,8 +1,8 @@
-﻿"""Unified inference for word and viseme lip-reading models.
-"""
+﻿"""Unified inference for word and viseme lip-reading models."""
 
 import argparse
 import json
+import sys
 from pathlib import Path
 import cv2
 import numpy as np
@@ -11,16 +11,36 @@ from training.model import ThreeDimensionalCNN
 from training.device import resolve_device
 from training.train_utils import load_checkpoint
 
-PROJECT_ROOT = Path(__file__).parent.parent
+_PROJECT_ROOT = Path(__file__).parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+PROJECT_ROOT = _PROJECT_ROOT
+VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.mpg', '.mpeg'}
+
+
+def load_frames_from_video(path: Path) -> np.ndarray:
+    """Read all BGR frames from a video file into an ndarray [T, H, W, 3]."""
+    cap = cv2.VideoCapture(str(path))
+    if not cap.isOpened():
+        raise IOError(f"Cannot open video: {path}")
+    bgr_frames = []
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+        bgr_frames.append(frame)
+    cap.release()
+    if not bgr_frames:
+        raise ValueError(f"No frames read from video: {path}")
+    return np.stack(bgr_frames, axis=0)
 
 
 def preprocess_clip(
-    frames: np.ndarray,
-    num_frames: int = 8,
-    height: int = 64,
-    width: int = 64,
-    bbox=None
-) -> torch.Tensor:
+        frames: np.ndarray,
+        num_frames: int = 8,
+        height: int = 64,
+        width: int = 64,
+        bbox=None) -> torch.Tensor:
     """Resample, crop, resize and normalise frames. Returns [1, 1, T, H, W]"""
     n = frames.shape[0]
     if n >= num_frames:
@@ -52,7 +72,9 @@ def preprocess_clip(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Lip-reading inference")
     parser.add_argument("task", choices=["word", "viseme"])
-    parser.add_argument("clip", type=Path, help="Path to .npy clip file")
+    parser.add_argument(
+        "clip", type=Path,
+        help="Path to .npy clip file or video (mp4/mov/avi/mpg)")
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--top-k", type=int, default=5)
     args = parser.parse_args()
@@ -60,23 +82,42 @@ def main() -> None:
     # load checkpoint, discover label map and class count
     ckpt = torch.load(
         args.checkpoint, map_location=device, weights_only=False)
-    label_map: dict = ckpt["label_map"]
+    if "label_map" in ckpt:
+        label_map: dict = ckpt["label_map"]
+        index_to_label = {v: k for k, v in label_map.items()}
+    elif "index_to_word" in ckpt:
+        index_to_label = {int(k): v for k, v in ckpt["index_to_word"].items()}
+        label_map = {v: k for k, v in index_to_label.items()}
+    elif "viseme_classes" in ckpt:
+        classes = ckpt["viseme_classes"]
+        index_to_label = {i: c for i, c in enumerate(classes)}
+        label_map = {c: i for i, c in enumerate(classes)}
+    else:
+        raise KeyError(
+            "Checkpoint missing label_map"
+            " / index_to_word / viseme_classes")
     num_classes = len(label_map)
-    index_to_label = {v: k for k, v in label_map.items()}
     model = ThreeDimensionalCNN(num_classes=num_classes, input_channels=1)
     load_checkpoint(args.checkpoint, model, device)
     print(f"Model loaded ({num_classes} classes, task={args.task})")
-    # load clip
-    frames = np.load(args.clip, allow_pickle=False)
+    # load clip accept both .npy and video files
+    if args.clip.suffix.lower() in VIDEO_EXTENSIONS:
+        print(f"Loading video: {args.clip.name}")
+        frames = load_frames_from_video(args.clip)
+        print(f"Video frames: {frames.shape}")
+    else:
+        frames = np.load(args.clip, allow_pickle=False)
     print(f"Clip shape: {frames.shape}")
     # optional lip bbox lookup for word task
     bbox = None
-    if args.task == "word":
+    if (args.task == "word"
+            and args.clip.suffix.lower() not in VIDEO_EXTENSIONS):
         bbox_json = (
             PROJECT_ROOT / "data" / "processed" / "words_lip_bboxes.json")
         if bbox_json.exists():
             with open(bbox_json, encoding="utf-8") as f:
                 raw = json.load(f)
+            raw = {k.lower(): v for k, v in raw.items()}
             key = str(args.clip.resolve()).lower()
             bbox = raw.get(key) or raw.get(key.replace("\\", "/"))
     tensor = preprocess_clip(frames, bbox=bbox).to(device)

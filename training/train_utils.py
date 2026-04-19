@@ -95,11 +95,38 @@ def save_checkpoint(
     print(f"  Checkpoint saved: {path}")
 
 
+_OLD_KEY_MAP = {
+    "conv_block_1": "block1",
+    "conv_block_2": "block2",
+    "conv_block_3": "block3",
+    "conv_block_4": "block4",
+    "fully_connected_classifier": "classifier",
+}
+
+_OLD_CLASSIFIER_IDX = {"classifier.0.": "classifier.1.",
+                       "classifier.3.": "classifier.4."}
+
+
+def _remap_state_dict(state_dict: Dict) -> Dict:
+    """Rename legacy layer keys to current names for backward compat."""
+    remapped = {}
+    for k, v in state_dict.items():
+        for old, new in _OLD_KEY_MAP.items():
+            k = k.replace(old, new, 1)
+        for old, new in _OLD_CLASSIFIER_IDX.items():
+            if k.startswith(old):
+                k = new + k[len(old):]
+                break
+        remapped[k] = v
+    return remapped
+
+
 def load_checkpoint(
     path: Path, model: nn.Module, device: torch.device
 ) -> Dict:
-    """Load checkpoint into model and return the full dict."""
+    """Load checkpoint into model and return the full dict"""
     ckpt = torch.load(path, map_location=device, weights_only=False)
-    model.load_state_dict(ckpt["model_state_dict"])
+    state_dict = _remap_state_dict(ckpt["model_state_dict"])
+    model.load_state_dict(state_dict)
     model.to(device).eval()
     return ckpt
