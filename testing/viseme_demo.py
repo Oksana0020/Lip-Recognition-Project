@@ -1,12 +1,13 @@
 """
 Viseme-Level Inference Demo
-Load a sample lip clip, run it through the trained
-Bozkurt viseme 3D CNN model and print the top-3
-predicted viseme classes with confidence bars.
+Interactive menu that lets pick a sample lip clip,
+runs it through the trained Bozkurt viseme 3D CNN model
+and prints the top-3 predicted viseme classes with confidence bars
 """
 
 from __future__ import annotations
 import argparse
+import os
 import sys
 from pathlib import Path
 from typing import List, Tuple
@@ -35,6 +36,37 @@ VISEME_DESCRIPTIONS = {
     "V14": "Dental fric.    (TH, DH)",
     "V15": "Labiodental     (F, V)",
     "V16": "Bilabial        (M, B, P)"}
+
+# Slected sample clips one per class, chosen from the dataset
+SAMPLE_CLIPS = [
+    ("V2  — Open vowel (AY/AH)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V2/bbab9s_34750_AY.npy"),
+    ("V3  — Mid vowel (EY/EH/AE)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V3/bbab8n_28000_EY.npy"),
+    ("V6  — Rounded lips (UW/UH/W)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V6/bbab8n_18500_UW.npy"),
+    ("V7  — Back rounded (AO/AA)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V7/bbae4n_37000_AO.npy"),
+    ("V8  — Diphthong (AW)  highest accuracy 99%",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V8/bbab8n_34250_AW.npy"),
+    ("V9  — Velar (G/K/NG)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V9/bbac1a_42750_G.npy"),
+    ("V10 — R-coloured (R)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V10/bbaczp_36500_R.npy"),
+    ("V11 — Alveolar (L/D/N/T)  largest class",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V11/bbab8n_17750_L.npy"),
+    ("V12 — Alveolar fricative (S/Z)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V12/bbab9s_39250_S.npy"),
+    ("V13 — Post-alveolar (CH/SH)  hardest class 79%",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy"
+     "/V13/bbih8n_34500_CH.npy"),
+    ("V14 — Dental fricative (TH/DH)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy"
+     "/V14/bbaf3a_44750_TH.npy"),
+    ("V15 — Labiodental (F/V)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V15/bbae4n_33750_F.npy"),
+    ("V16 — Bilabial (M/B/P)",
+     "data/processed/visemes_bozkurt_mfa_balanced_npy/V16/bbbm1a_39500_M.npy")]
 
 
 def load_model(
@@ -137,6 +169,54 @@ def print_results(
             f"expected {ground_truth}\n")
 
 
+# Sample clip selection menu
+def resolve_existing_clips(
+    clips: List[Tuple[str, str]],
+    data_root: Path,
+) -> List[Tuple[str, str]]:
+    """
+    Return clips whose .npy file exists.
+    Falls back to the first available .npy in the class folder
+    if the exact file is missing.
+    """
+    resolved = []
+    for label, rel_path in clips:
+        full = PROJECT_ROOT / rel_path
+        if full.exists():
+            resolved.append((label, str(full)))
+            continue
+        # try to find any .npy in the same class folder
+        class_name = label.split()[0].strip()
+        class_folder = data_root / class_name
+        if class_folder.exists():
+            npys = sorted(class_folder.glob("*.npy"))
+            if npys:
+                resolved.append((label, str(npys[0])))
+                continue
+        print(f"  [warn] No clip found for {label} — skipping.")
+    return resolved
+
+
+def pick_clip(
+    clips: List[Tuple[str, str]],
+) -> Tuple[str, str] | None:
+    """Print numbered menu and return the chosen (label, path) tuple"""
+    print("\n  Available sample clips:")
+    print("  " + "─" * 58)
+    for i, (label, _) in enumerate(clips, 1):
+        print(f"  {i:>2}. {label}")
+    print("  " + "─" * 58)
+    print("   0. Exit")
+    print()
+    while True:
+        raw = input("  Enter number: ").strip()
+        if raw == "0":
+            return None
+        if raw.isdigit() and 1 <= int(raw) <= len(clips):
+            return clips[int(raw) - 1]
+        print("  Invalid choice — please enter a number from the list.")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Viseme-level inference demo")
@@ -146,15 +226,10 @@ def parse_args() -> argparse.Namespace:
         default=PROJECT_ROOT
         / "training/checkpoints_bozkurt_viseme/bozkurt_viseme_best_model.pth")
     parser.add_argument(
-        "--clip",
+        "--data-root",
         type=Path,
-        required=True,
-        help="Path to a .npy viseme clip")
-    parser.add_argument(
-        "--ground-truth",
-        type=str,
-        required=True,
-        help="Expected viseme label, e.g. V8")
+        default=PROJECT_ROOT
+        / "data/processed/visemes_bozkurt_mfa_balanced_npy")
     return parser.parse_args()
 
 
@@ -165,24 +240,35 @@ def main() -> None:
     print("   Viseme-Level Inference Demo  —  Bozkurt 3D CNN")
     print("=" * 60)
     print(f"  Checkpoint : {args.checkpoint}")
-    print(f"  Clip       : {args.clip}")
     print(f"  Device     : {device}")
     print("\n  Loading model...", end=" ", flush=True)
     model, viseme_classes = load_model(args.checkpoint, device)
     print(f"done  ({len(viseme_classes)} classes, "
           f"val acc 82.78%)")
-    print(f"\n  Running inference on: {args.clip.name}")
-    try:
-        tensor = preprocess_clip(
-            args.clip,
-            sequence_length=SEQUENCE_LENGTH,
-            height=VIDEO_HEIGHT,
-            width=VIDEO_WIDTH)
-        predictions = run_inference(
-            model, tensor, viseme_classes, device)
-        print_results(predictions, args.ground_truth)
-    except Exception as exc:
-        print(f"\n  Error processing clip: {exc}\n")
+    clips = resolve_existing_clips(SAMPLE_CLIPS, args.data_root)
+    if not clips:
+        print("\n  No sample clips found. "
+              "Check --data-root path.")
+        sys.exit(1)
+    while True:
+        choice = pick_clip(clips)
+        if choice is None:
+            print("\n  Exiting demo.\n")
+            break
+        label, clip_path = choice
+        ground_truth = label.split()[0].strip()
+        print(f"\n  Running inference on: {os.path.basename(clip_path)}")
+        try:
+            tensor = preprocess_clip(
+                Path(clip_path),
+                sequence_length=SEQUENCE_LENGTH,
+                height=VIDEO_HEIGHT,
+                width=VIDEO_WIDTH)
+            predictions = run_inference(
+                model, tensor, viseme_classes, device)
+            print_results(predictions, ground_truth)
+        except Exception as exc:
+            print(f"\n  Error processing clip: {exc}\n")
 
 
 if __name__ == "__main__":
