@@ -1,3 +1,4 @@
+
 """
 Viseme-Level Inference Demo
 Interactive menu that lets pick a sample lip clip,
@@ -6,19 +7,23 @@ and prints the top-3 predicted viseme classes with confidence bars
 """
 
 from __future__ import annotations
+
+from pathlib import Path
+from typing import List, Tuple
 import argparse
 import os
 import sys
-from pathlib import Path
-from typing import List, Tuple
+
+import cv2
 import numpy as np
 import torch
-import cv2
-from training.model import ThreeDimensionalCNN
-from training.train_utils import _remap_state_dict
 
 PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.append(str(PROJECT_ROOT))
+
+from training.model import ThreeDimensionalCNN  # noqa: E402
+from training.train_utils import _remap_state_dict  # noqa: E402
+
 SEQUENCE_LENGTH = 8
 VIDEO_HEIGHT = 64
 VIDEO_WIDTH = 64

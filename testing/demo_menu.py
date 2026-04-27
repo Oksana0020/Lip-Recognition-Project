@@ -35,7 +35,7 @@ def run(cmd: list[str]) -> None:
 def run_my_words_demo() -> None:
     """Recognize words from videos in testing/my_words."""
     clear()
-    print("   Demo 5 — Recognize My Word Videos")
+    print("   Demo 4— Recognize My Word Videos")
     print("=" * 60)
     my_words_dir = PROJECT_ROOT / "testing" / "my_words"
     if not my_words_dir.exists():
@@ -45,8 +45,7 @@ def run_my_words_demo() -> None:
         f for f in my_words_dir.iterdir()
         if f.suffix.lower() in {
             '.mp4', '.mov', '.avi', '.mkv', '.mpg', '.mpeg'
-        }
-    ])
+        }])
     if not videos:
         print("  No video files found in my_words.")
         return
@@ -152,7 +151,7 @@ def run_word_demo() -> None:
                     / "training/checkpoints_words/best_model_words.pth"),
                 "--top-k", "3"])
             print()
-            break
+            continue
         print("  Invalid choice.")
 
 
@@ -264,7 +263,7 @@ def run_my_words_cropped_video_demo() -> None:
     testing/my_words_cropped_videos.
     """
     clear()
-    print("   Demo 5b — Recognize My Cropped Word Videos")
+    print("   Demo 5 — Recognize My Cropped Word Videos")
     print("=" * 60)
     crop_dir = PROJECT_ROOT / "testing" / "my_words_cropped_videos"
     if not crop_dir.exists():
@@ -313,7 +312,7 @@ def run_my_visemes_cropped_video_demo() -> None:
     testing/my_sounds_cropped_videos.
     """
     clear()
-    print("   Demo 6 — Recognize My Cropped Viseme Videos")
+    print("   Demo 7— Recognize My Cropped Viseme Videos")
     print("=" * 60)
     crop_dir = PROJECT_ROOT / "testing" / "my_sounds_cropped_videos"
     if not crop_dir.exists():

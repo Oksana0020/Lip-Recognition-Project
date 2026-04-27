@@ -1,23 +1,23 @@
 ﻿"""Unified inference for word and viseme lip-reading models."""
 
-
-import sys
-import numpy as np
-import cv2
-import torch
 import argparse
 import json
+import sys
 from pathlib import Path
-from training.model import ThreeDimensionalCNN
-from training.device import resolve_device
-from training.train_utils import load_checkpoint
 
+import cv2
+import numpy as np
+import torch
 
-_PROJECT_ROOT = Path(__file__).parent.parent
-if str(_PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PROJECT_ROOT))
-PROJECT_ROOT = _PROJECT_ROOT
-VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.mpg', '.mpeg'}
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from training.model import ThreeDimensionalCNN  # noqa: E402
+from training.device import resolve_device  # noqa: E402
+from training.train_utils import load_checkpoint  # noqa: E402
+
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".mpg", ".mpeg"}
 
 
 def load_viseme_phoneme_map():
