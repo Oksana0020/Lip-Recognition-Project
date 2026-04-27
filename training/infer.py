@@ -1,21 +1,38 @@
 ﻿"""Unified inference for word and viseme lip-reading models."""
 
+
+import sys
+import numpy as np
+import cv2
+import torch
 import argparse
 import json
-import sys
 from pathlib import Path
-import cv2
-import numpy as np
-import torch
 from training.model import ThreeDimensionalCNN
 from training.device import resolve_device
 from training.train_utils import load_checkpoint
+
 
 _PROJECT_ROOT = Path(__file__).parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 PROJECT_ROOT = _PROJECT_ROOT
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.mpg', '.mpeg'}
+
+
+def load_viseme_phoneme_map():
+    mapping_path = PROJECT_ROOT / "mapping" / "bozkurt_viseme_map.csv"
+    viseme_to_phonemes = {}
+    if mapping_path.exists():
+        import csv
+        with open(mapping_path, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                viseme = row["viseme_class"].strip()
+                phonemes = [p.strip() for p in row["phonemes"].split(",")
+                            if p.strip()]
+                viseme_to_phonemes[viseme] = phonemes
+    return viseme_to_phonemes
 
 
 def load_frames_from_video(path: Path) -> np.ndarray:
@@ -121,16 +138,34 @@ def main() -> None:
             key = str(args.clip.resolve()).lower()
             bbox = raw.get(key) or raw.get(key.replace("\\", "/"))
     tensor = preprocess_clip(frames, bbox=bbox).to(device)
+
     with torch.no_grad():
         logits = model(tensor)
         probs = torch.softmax(logits, dim=1)[0]
     top_k = min(args.top_k, num_classes)
-    top_probs, top_indices = probs.topk(top_k)
-    print(f"\nTop-{top_k} predictions:")
-    pairs = zip(top_probs.tolist(), top_indices.tolist())
-    for rank, (prob, idx) in enumerate(pairs, start=1):
+    top_probs, top_indices = probs.topk(num_classes)
+    filtered = []
+    for prob, idx in zip(top_probs.tolist(), top_indices.tolist()):
         label = index_to_label.get(idx, str(idx))
-        print(f"  {rank}. {label:<15} {prob * 100:.2f}%")
+        if args.task == "word" and len(label) == 1:
+            continue  # skip one-letter words
+        filtered.append((prob, idx))
+        if len(filtered) == top_k:
+            break
+    print(f"\nTop-{len(filtered)} predictions:")
+    viseme_to_phonemes = None
+    if args.task == "viseme":
+        viseme_to_phonemes = load_viseme_phoneme_map()
+    for rank, (prob, idx) in enumerate(filtered, start=1):
+        label = index_to_label.get(idx, str(idx))
+        if args.task == "viseme" and viseme_to_phonemes:
+            phonemes = viseme_to_phonemes.get(label, [])
+            phoneme_str = ', '.join(phonemes) if phonemes else '-'
+            print(
+                f"  {rank}. {label:<8} {prob * 100:.2f}%   "
+                f"phonemes: {phoneme_str}")
+        else:
+            print(f"  {rank}. {label:<15} {prob * 100:.2f}%")
 
 
 if __name__ == "__main__":
