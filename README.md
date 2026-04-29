@@ -1,3 +1,4 @@
+
 # Training
 
 The two lip-reading models built for this project: a **word-level model** and a **viseme-level model**.
@@ -157,3 +158,130 @@ V13 is the hardest because post-alveolar sounds look similar to each other and h
 
 ---
 
+
+# Project Structure
+
+```
+Project Structure
+
+LipRecognitionFYP/
+├── data/
+│   ├── grid/
+│   └── processed/
+│       ├── phonemes_by_label_mfa/
+│       ├── phonemes_mfa/
+│       ├── visemes_bozkurt_mfa/
+│       ├── visemes_bozkurt_mfa_balanced_npy/
+│       ├── words_by_label/
+│       └── words_lip_bboxes.json
+│
+├── demo/
+│   ├── lip_regions/
+│   ├── phoneme_frames/
+│   ├── phoneme_frames_mfa/
+│   ├── phoneme_frames_mfa_2test/
+│   ├── phoneme_frames_mfa_50/
+│   ├── phoneme_jsons/
+│   ├── plots/
+│   ├── __init__.py
+│   ├── alignment_manual_ratings.csv
+│   ├── batch_equal_partition_results.json
+│   ├── batch_mfa_2test_results.json
+│   ├── demo_results.json
+│   ├── evaluate_alignment_stats.py
+│   ├── export_phoneme_frames_from_*.py
+│   ├── extract_lip_regions_with_dlib.py
+│   ├── extract_phonemes_equal_partition.py
+│   ├── extract_words_from_grid_video.py
+│   ├── lip_extraction_results.json
+│   ├── mfa_phoneme_frame_extraction.py
+│   ├── phoneme_extraction_equal_partition.json
+│   ├── phoneme_extraction_mfa.json
+│   ├── plot_alignment_stats.py
+│   ├── run_demo_menu.py
+│   ├── run_equal_partition_on_sample.py
+│   ├── run_mfa_on_sample.py
+│   ├── sample_50_grid_pairs.json
+│   ├── sample_50_grid_videos.py
+│   ├── save_phoneme_frames.py
+│   ├── summarize_batch_mfa_results.py
+│   └── summarize_equal_partition_results.py
+│
+├── initial_testing/
+│   ├── simple_output/
+│   └── initial_lip_detection.py
+│
+├── mapping/
+│   ├── processed/
+│   ├── bozkurt_viseme_map.csv
+│   ├── organize_frames_by_viseme.py
+│   └── test_mapping.py
+│
+├── preprocessing/
+│   ├── dataset_splitting_utils.py
+│   ├── precompute_lip_bboxes.py
+│   ├── precompute_viseme_npy_dataset.py
+│   ├── run_mfa_preprocessing_pipeline.py
+│   ├── run_word_preprocessing_pipeline.py
+│   └── split_dataset_train_val_test.py
+│
+├── testing/
+│   ├── my_sounds/
+│   ├── my_sounds_cropped_videos/
+│   ├── my_words/
+│   ├── my_words_cropped_videos/
+│   ├── my_words_npy/
+│   ├── demo_menu.py
+│   ├── viseme_demo.py
+│   └── webcam_test.py
+│
+├── tools/
+│   ├── ffmpeg/
+│   ├── preprocess_my_sounds.py
+│   └── preprocess_my_words.py
+│
+├── training/
+│   ├── checkpoints_words/
+│   ├── results_bozkurt_viseme/
+│   ├── results_words/
+│   ├── runs_bozkurt_viseme/
+│   ├── runs_words/
+│   ├── dataset.py
+│   ├── device.py
+│   ├── infer.py
+│   ├── model.py
+│   ├── train_utils.py
+│   ├── train_viseme_recognition_bozkurt_3d_cnn.py
+│   └── train_word_recognition_3d_cnn.py
+│
+├── validation/
+│   ├── results_bozkurt_viseme/
+│   ├── results_comparison/
+│   ├── results_viseme/
+│   ├── results_words/
+│   ├── compare_models_plot.py
+│   ├── evaluate_model.py
+│   ├── per_class_accuracy.py
+│   └── qualitative_examples.py
+│
+├── visuals/
+│   ├── viseme/
+│   ├── viseme_eval/
+│   ├── word/
+│   ├── architecture_diagram.png
+│   ├── architecture_diagram_viseme.png
+│   ├── architecture_diagram_word.png
+│   ├── data_statistics.png
+│   ├── plot_architecture_diagram.py
+│   ├── plot_viseme_class_analysis.py
+│   ├── plot_word_training_results.py
+│   ├── sample_video_blue.png
+│   ├── visualize_viseme_data.py
+│   └── visualize_words_model_and_data.py
+│
+├── .gitignore
+├── README.md
+├── requirements.txt
+└── shape_predictor_68_face_landmarks.dat.bz2
+└── ...
+```
