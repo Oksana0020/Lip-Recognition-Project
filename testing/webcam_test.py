@@ -179,8 +179,8 @@ def _enter_pressed() -> bool:
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Webcam word recognition test")
-    parser.add_argument("--seconds", type=float, default=1.0,
-                        help="Recording duration in seconds (default: 1.0). "
+    parser.add_argument("--seconds", type=float, default=1.5,
+                        help="Recording duration in seconds (default: 1.5). "
                         "Speak immediately when REC appears.")
     parser.add_argument("--camera", type=int, default=0)
     parser.add_argument("--top-k", type=int, default=5)

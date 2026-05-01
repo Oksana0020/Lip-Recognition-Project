@@ -73,7 +73,7 @@ def run_my_words_demo() -> None:
                 "--top-k", "5"
             ])
             print()
-            break
+            continue
         print("  Invalid choice.")
 
 
@@ -253,7 +253,7 @@ def run_my_visemes_demo() -> None:
                 "--top-k", "5"
             ])
             print()
-            break
+            continue
         print("  Invalid choice.")
 
 
@@ -302,57 +302,7 @@ def run_my_words_cropped_video_demo() -> None:
                 "--top-k", "5"
             ])
             print()
-            break
-        print("  Invalid choice.")
-
-
-def run_my_visemes_cropped_video_demo() -> None:
-    """
-    Recognize visemes from cropped videos in
-    testing/my_sounds_cropped_videos.
-    """
-    clear()
-    print("   Demo 7— Recognize My Cropped Viseme Videos")
-    print("=" * 60)
-    crop_dir = PROJECT_ROOT / "testing" / "my_sounds_cropped_videos"
-    if not crop_dir.exists():
-        print(f"  Folder not found: {crop_dir}")
-        return
-    videos = sorted([
-        f for f in crop_dir.iterdir()
-        if f.suffix.lower() in {
-            '.mp4', '.mov', '.avi', '.mkv', '.mpg', '.mpeg'
-        }
-    ])
-    if not videos:
-        print("  No cropped video files found in my_sounds_cropped_videos.")
-        return
-    print("  Pick a cropped viseme video to recognize:")
-    for i, vid in enumerate(videos, 1):
-        print(f"  {i}. {vid.name}")
-    print("   0. Back to main menu\n")
-    while True:
-        raw = input("  Enter number: ").strip()
-        if raw == "0":
-            return
-        if raw.isdigit() and 1 <= int(raw) <= len(videos):
-            vid_path = videos[int(raw) - 1]
-            print(f"\n  Running inference on: {vid_path.name}\n")
-            checkpoint_path = PROJECT_ROOT / (
-                "training/checkpoints_bozkurt_viseme/"
-                "bozkurt_viseme_best_model.pth"
-            )
-            run([
-                PYTHON,
-                str(PROJECT_ROOT / "training" / "infer.py"),
-                "viseme",
-                str(vid_path),
-                "--checkpoint",
-                str(checkpoint_path),
-                "--top-k", "5"
-            ])
-            print()
-            break
+            continue
         print("  Invalid choice.")
 
 
@@ -380,11 +330,6 @@ MENU_ITEMS = [
     (
         "Recognize my viseme videos (testing/my_sounds)",
         run_my_visemes_demo
-    ),
-    (
-        "Recognize my cropped viseme videos "
-        "(testing/my_sounds_cropped_videos)",
-        run_my_visemes_cropped_video_demo
     ),
 ]
 
